@@ -1,6 +1,6 @@
 '''
 Developer: Ahmed Mokhtar
-MI: Impelemntation Team
+MI: Implementation Team
 JoGo
 14 March 2020
 '''
@@ -22,7 +22,7 @@ class Game:
         # Positive Numbers reperesent the black number of liberties where 1 has no liberties and 5 has 4 liberties.
         # Negative numbers reperesent the white number of liberties where -1 has no liberties and -5 has 4 liberties.
         # 0 means an empty interesection in the GO board.
-        self.pieces = {'1':'B', '2':'B', '3':'B', '4':'B', '5':'B', '0':'-', '-1':'W', '-1':'W', '-2':'W', '-3':'W', '-4':'W', '-5':'W'}
+        self.pieces = {'1':'B', '2':'B', '3':'B', '4':'B', '5':'B', '0':'-', '-1':'W', '-2':'W', '-3':'W', '-4':'W', '-5':'W'}
         self.grid_shape = (19, 19)
         # # 19*19 Board State binary bits times 2 for each to be used by agents to their neural network.
         self.input_shape = (2, 19, 19)
@@ -70,3 +70,141 @@ class Game:
         identities.append((GameState(currentBoard, state.playerTurn), currentAV))
         
         return identities
+    
+    
+class GameState():
+    def __init__(self, board, playerTurn):
+        self.board = board
+        self.pieces = {'1':'B', '2':'B', '3':'B', '4':'B', '5':'B', '0':'-', '-1':'W', '-2':'W', '-3':'W', '-4':'W', '-5':'W'}
+        self.playerTurn = playerTurn
+        self.binary = self._binary()
+        self.id = self._convertStateToId()
+        self.allowedActions = self._allowedActions()
+        self.isEndGame = self._checkForEndGame()
+        self.value = self._getValue()
+        self.score = self._getScore()
+        
+    def checkSuicideRule(self, action):
+        place = (action + 1) % 19
+        isUpper = (action >= 341)
+        isLower = (action <= 18)
+        
+        #Upper Left Corner with 2 leberties
+        if isUpper and place ==1:
+            if self.playerTurn == 1:
+                if self.board[action+1] < 0 and self.board[action-19] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action+1] > 0 and self.board[action-19] > 0:
+                    return False
+                
+        #Upper Right Corner with 2 leberties
+        elif isUpper and place ==0:
+            if self.playerTurn == 1:
+                if self.board[action-1] < 0 and self.board[action-19] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action-1] > 0 and self.board[action-19] > 0:
+                    return False
+
+        #Lower Left Corner with 2 leberties
+        elif isUpper and place ==0:
+            if self.playerTurn == 1:
+                if self.board[action+1] < 0 and self.board[action+19] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action+1] > 0 and self.board[action+19] > 0:
+                    return False
+                
+        #Lower Right Corner with 2 leberties
+        elif isUpper and place ==0:
+            if self.playerTurn == 1:
+                if self.board[action-1] < 0 and self.board[action+19] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action-1] > 0 and self.board[action+19] > 0:
+                    return False
+        
+        #Upper Edge with 3 leberties
+        elif isUpper:
+            if self.playerTurn == 1:
+                if self.board[action-1] < 0 and self.board[action-19] < 0 and self.board[action+1] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action-1] > 0 and self.board[action-19] > 0 and self.board[action+1] > 0:
+                    return False
+                
+        #Lower Edge with 3 leberties
+        elif isLower:
+            if self.playerTurn == 1:
+                if self.board[action+1] < 0 and self.board[action-1] < 0 and self.board[action+19] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action+1] > 0 and self.board[action-1] > 0 and self.board[action+19] > 0:
+                    return False
+        
+        #Right Edge with 3 leberties
+        elif place == 0:
+            if self.playerTurn == 1:
+                if self.board[action-1] < 0 and self.board[action-19] < 0 and self.board[action+19] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action-1] > 0 and self.board[action-19] > 0 and self.board[action+19] > 0:
+                    return False
+                
+        #Left Edge with 3 leberties
+        elif place == 1:
+            if self.playerTurn == 1:
+                if self.board[action+1] < 0 and self.board[action-19] < 0 and self.board[action+19] < 0:
+                    return False
+            elif self.playerTurn == -1:
+                if self.board[action+1] > 0 and self.board[action-19] > 0 and self.board[action+19] > 0:
+                    return False
+                
+        
+        return True
+                
+        
+
+    def _allowedActions(self):
+        allowed = []
+        for i in range(len(self.board)):
+            if self.board[i]==0 and self.checkSuicideRule(i):
+                allowed.append(i)
+        if(self.playerTurn == 1):
+            allowed.append(361)
+        else:
+            allowed.append(362)
+                
+        return allowed
+
+    def _binary(self):
+        currentplayer_position = np.zeros(len(self.board), dtype=np.int)
+        other_position = np.zeros(len(self.board), dtype=np.int)
+        if(self.playerTurn == 1):
+            currentplayer_position[self.board>0] = 1
+            other_position[self.board<0] = 1
+        else:
+            currentplayer_position[self.board<0] = 1
+            other_position[self.board>0] = 1
+            
+        position = np.append(currentplayer_position,other_position)
+        return (position)
+
+    def _convertStateToId(self):
+        player1_position = np.zeros(len(self.board), dtype=np.int)
+        player1_position[self.board>0] = 1
+
+        other_position = np.zeros(len(self.board), dtype=np.int)
+        other_position[self.board<0] = 1
+
+        position = np.append(player1_position,other_position)
+        id = ''.join(map(str,position))
+        
+        return id
+    
+    def _checkForEndGame(self):
+        if(self.board[361] and self.board[362]):
+            return 1
+        return 0
+
