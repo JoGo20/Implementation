@@ -5,6 +5,7 @@ JoGo
 14 March 2020
 '''
 import numpy as np
+import logging
 
 
 class Game:
@@ -16,7 +17,7 @@ class Game:
         # 363 STATE SPACE. 0 TO 362
         self.gameState=GameState(np.array(np.zeros(363),dtype=np.int),1)
         #  19*19 PLACES EQUALS 361 BOARD ACTION SPACE.
-        #  1 ACTION SPACE FOR ANY AGENT TO PASS THEIR TURN TI THE OPPONENT.
+        #  1 ACTION SPACE FOR ANY AGENT TO PASS THEIR TURN TO THE OPPONENT.
         #  362 ACTION SPACE. 0 TO 361
         self.actionSpace = np.array(np.zeros(363), dtype = np.int)
         # Positive Numbers reperesent the black number of liberties where 1 has no liberties and 5 has 4 liberties.
@@ -84,12 +85,12 @@ class GameState():
         self.value = self._getValue()
         self.score = self._getScore()
         
-    def checkSuicideRule(self, action):
+    def _checkZeroLiberty(self, action):
         place = (action + 1) % 19
         isUpper = (action >= 341)
         isLower = (action <= 18)
         
-        #Upper Left Corner with 2 leberties
+        #Upper Left Corner with 2 Liberties
         if isUpper and place ==1:
             if self.playerTurn == 1:
                 if self.board[action+1] < 0 and self.board[action-19] < 0:
@@ -98,7 +99,7 @@ class GameState():
                 if self.board[action+1] > 0 and self.board[action-19] > 0:
                     return False
                 
-        #Upper Right Corner with 2 leberties
+        #Upper Right Corner with 2 Liberties
         elif isUpper and place ==0:
             if self.playerTurn == 1:
                 if self.board[action-1] < 0 and self.board[action-19] < 0:
@@ -107,7 +108,7 @@ class GameState():
                 if self.board[action-1] > 0 and self.board[action-19] > 0:
                     return False
 
-        #Lower Left Corner with 2 leberties
+        #Lower Left Corner with 2 Liberties
         elif isUpper and place ==0:
             if self.playerTurn == 1:
                 if self.board[action+1] < 0 and self.board[action+19] < 0:
@@ -116,7 +117,7 @@ class GameState():
                 if self.board[action+1] > 0 and self.board[action+19] > 0:
                     return False
                 
-        #Lower Right Corner with 2 leberties
+        #Lower Right Corner with 2 Liberties
         elif isUpper and place ==0:
             if self.playerTurn == 1:
                 if self.board[action-1] < 0 and self.board[action+19] < 0:
@@ -125,7 +126,7 @@ class GameState():
                 if self.board[action-1] > 0 and self.board[action+19] > 0:
                     return False
         
-        #Upper Edge with 3 leberties
+        #Upper Edge with 3 Liberties
         elif isUpper:
             if self.playerTurn == 1:
                 if self.board[action-1] < 0 and self.board[action-19] < 0 and self.board[action+1] < 0:
@@ -134,7 +135,7 @@ class GameState():
                 if self.board[action-1] > 0 and self.board[action-19] > 0 and self.board[action+1] > 0:
                     return False
                 
-        #Lower Edge with 3 leberties
+        #Lower Edge with 3 Liberties
         elif isLower:
             if self.playerTurn == 1:
                 if self.board[action+1] < 0 and self.board[action-1] < 0 and self.board[action+19] < 0:
@@ -143,7 +144,7 @@ class GameState():
                 if self.board[action+1] > 0 and self.board[action-1] > 0 and self.board[action+19] > 0:
                     return False
         
-        #Right Edge with 3 leberties
+        #Right Edge with 3 Liberties
         elif place == 0:
             if self.playerTurn == 1:
                 if self.board[action-1] < 0 and self.board[action-19] < 0 and self.board[action+19] < 0:
@@ -152,7 +153,7 @@ class GameState():
                 if self.board[action-1] > 0 and self.board[action-19] > 0 and self.board[action+19] > 0:
                     return False
                 
-        #Left Edge with 3 leberties
+        #Left Edge with 3 Liberties
         elif place == 1:
             if self.playerTurn == 1:
                 if self.board[action+1] < 0 and self.board[action-19] < 0 and self.board[action+19] < 0:
@@ -162,14 +163,100 @@ class GameState():
                     return False
                 
         
+        #Otherwise on the board with 4 Liberties
+        if self.playerTurn == 1:
+            if self.board[action+1] < 0 and self.board[action-1] < 0 and self.board[action-19] < 0 and self.board[action+19] < 0:
+                return False
+        elif self.playerTurn == -1:
+            if self.board[action+1] > 0 and self.board[action-1] < 0 and self.board[action-19] > 0 and self.board[action+19] > 0:
+                return False
+        
         return True
                 
+    
+    def _findActionLiberty(self, action):
+        place = (action + 1) % 19
+        isUpper = (action >= 341)
+        isLower = (action <= 18)
+        liberties = 0
+        #Upper Left Corner with 2 Liberties
+        if isUpper and place ==1:
+            if self.board[action+1] == 0:
+                liberties += 1
+            if  self.board[action-19] ==0:
+                liberties += 1
+        #Upper Right Corner with 2 Liberties
+        elif isUpper and place ==0:
+            if self.board[action-1] == 0:
+                liberties += 1
+            if  self.board[action-19] ==0:
+                liberties += 1
+        #Lower Left Corner with 2 Liberties
+        elif isUpper and place ==0:
+            if self.board[action+1] == 0:
+                liberties += 1
+            if  self.board[action+19] ==0:
+                liberties += 1         
+        #Lower Right Corner with 2 Liberties
+        elif isUpper and place ==0:
+            if self.board[action-1] == 0:
+                liberties += 1
+            if  self.board[action_19] ==0:
+                liberties += 1
+        #Upper Edge with 3 Liberties
+        elif isUpper:
+            if self.board[action-1] == 0:
+                liberties += 1
+            if  self.board[action-19] ==0:
+                liberties += 1
+            if self.board[action+1] == 0:
+                liberties += 1
+                
+        #Lower Edge with 3 Liberties
+        elif isLower:
+            
+            if self.board[action-1] == 0:
+                liberties += 1
+            if  self.board[action+19] ==0:
+                liberties += 1
+            if self.board[action+1] == 0:
+                liberties += 1
         
+        #Right Edge with 3 Liberties
+        elif place == 0:
+            if self.board[action-1] == 0:
+                liberties += 1
+            if  self.board[action+19] ==0:
+                liberties += 1
+            if self.board[action+1] == 0:
+                liberties += 1
+                
+        #Left Edge with 3 Liberties
+        elif place == 1:
+            if self.board[action+1] == 0:
+                liberties += 1
+            if  self.board[action-19] ==0:
+                liberties += 1
+            if self.board[action+19] == 0:
+                liberties += 1
+                        
+        #Otherwise on the board with 4 Liberties
+        else:
+            if self.board[action+1] == 0:
+                liberties += 1
+            if  self.board[action-19] ==0:
+                liberties += 1
+            if self.board[action-1] == 0:
+                liberties += 1
+            if  self.board[action+19] ==0:
+                liberties += 1
+        
+        return liberties
 
     def _allowedActions(self):
         allowed = []
         for i in range(len(self.board)):
-            if self.board[i]==0 and self.checkSuicideRule(i):
+            if self.board[i]==0 and self._checkZeroLiberty(i):
                 allowed.append(i)
         if(self.playerTurn == 1):
             allowed.append(361)
@@ -194,10 +281,8 @@ class GameState():
     def _convertStateToId(self):
         player1_position = np.zeros(len(self.board), dtype=np.int)
         player1_position[self.board>0] = 1
-
         other_position = np.zeros(len(self.board), dtype=np.int)
         other_position[self.board<0] = 1
-
         position = np.append(player1_position,other_position)
         id = ''.join(map(str,position))
         
@@ -207,4 +292,79 @@ class GameState():
         if(self.board[361] and self.board[362]):
             return 1
         return 0
+    
+    
+    def _getPrisoners(self,curr_player):
+        prisoners_count = 0
+        if curr_player:
+            for i in range(len(self.board)-2):
+                if self._checkZeroLiberty(i):
+                    prisoners_count += prisoners_count
+            return prisoners_count
+        else:
+            self.playerTurn = -self.playerTurn
+            for i in range(len(self.board)-2):
+                if self._checkZeroLiberty(i):
+                    prisoners_count += prisoners_count
+            self.playerTurn = -self.playerTurn
+            return prisoners_count            
+    
+
+    def _getValue(self):
+        current_player_liberties = 0
+        other_player_liberties = 0
+        if self.playerTurn == 1:
+            for i in range(len(self.board)-2):
+                if self.board[i] > 0:
+                    current_player_liberties+=(self.board[i]-1)
+                elif self.board[i] < 0:
+                    other_player_liberties+=((-self.board[i])-1)      
+        elif self.playerTurn == -1:
+            for i in range(len(self.board)-2):
+                if self.board[i] > 0:
+                    other_player_liberties+=(self.board[i]-1)
+                elif self.board[i] < 0:
+                    current_player_liberties+=((-self.board[i])-1)           
+        current_player_prisoners = self._getPrisoners(1)
+        other_player_prisoners = self._getPrisoners(0) 
+        
+        current_player_score = current_player_liberties + 4*other_player_prisoners - 4*current_player_prisoners
+        other_player_score = other_player_liberties + 4*current_player_prisoners - 4*other_player_prisoners
+        return ((current_player_score-other_player_score),current_player_score,other_player_score)
+    
+    
+    def _getScore(self):
+        tmp = self.value
+        return (tmp[1], tmp[2])
+    
+    
+    def takeAction(self, action):
+        newBoard = np.array(self.board)
+        
+        if action == 361:
+            newBoard[action] = 1
+        elif action == 362:
+            newBoard[action] = 1
+        else:
+            newBoard[action]=(self._findActionLiberty())*self.playerTurn
+            newBoard[361]=0
+            newBoard[362]=0
+        
+        newState = GameState(newBoard, -self.playerTurn)
+        value = 0
+        done = 0
+        
+        if newState.isEndGame:
+            value = newState.value[0]
+            done = 1
+            
+        return (newState, value, done) 
+    
+    
+    
+    def render(self, logger):
+        for r in range(19):
+            logger.info([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
+        logger.info('--------------')
+                
 
