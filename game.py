@@ -346,7 +346,7 @@ class GameState():
         elif action == 362:
             newBoard[action] = 1
         else:
-            newBoard[action]=(self._findActionLiberty())*self.playerTurn
+            newBoard[action]=(self._findActionLiberty(action))*self.playerTurn + self.playerTurn 
             newBoard[361]=0
             newBoard[362]=0
         
