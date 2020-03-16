@@ -201,7 +201,7 @@ class GameState():
         elif isUpper and place ==0:
             if self.board[action-1] == 0:
                 liberties += 1
-            if  self.board[action_19] ==0:
+            if  self.board[action+19] ==0:
                 liberties += 1
         #Upper Edge with 3 Liberties
         elif isUpper:
@@ -266,14 +266,14 @@ class GameState():
         return allowed
 
     def _binary(self):
-        currentplayer_position = np.zeros(len(self.board), dtype=np.int)
-        other_position = np.zeros(len(self.board), dtype=np.int)
+        currentplayer_position = np.zeros(len(self.board)-2, dtype=np.int)
+        other_position = np.zeros(len(self.board)-2, dtype=np.int)
         if(self.playerTurn == 1):
-            currentplayer_position[self.board>0] = 1
-            other_position[self.board<0] = 1
+            currentplayer_position[self.board[0:361]>0] = 1
+            other_position[self.board[0:361]<0] = 1
         else:
-            currentplayer_position[self.board<0] = 1
-            other_position[self.board>0] = 1
+            currentplayer_position[self.board[0:361]<0] = 1
+            other_position[self.board[0:361]>0] = 1
             
         position = np.append(currentplayer_position,other_position)
         return (position)
@@ -363,8 +363,12 @@ class GameState():
     
     
     def render(self, logger):
+        print()
+        print(self.pieces[str(self.playerTurn)] + "'s turn:")
         for r in range(19):
             logger.info([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
+            print([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
         logger.info('--------------')
+        print(self.value)
                 
 
