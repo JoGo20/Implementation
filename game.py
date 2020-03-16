@@ -164,7 +164,7 @@ class GameState():
                 
         
         #Otherwise on the board with 4 Liberties
-        if self.playerTurn == 1:
+        elif self.playerTurn == 1:
             if self.board[action+1] < 0 and self.board[action-1] < 0 and self.board[action-19] < 0 and self.board[action+19] < 0:
                 return False
         elif self.playerTurn == -1:
@@ -201,7 +201,7 @@ class GameState():
         elif isUpper and place ==0:
             if self.board[action-1] == 0:
                 liberties += 1
-            if  self.board[action_19] ==0:
+            if  self.board[action+19] ==0:
                 liberties += 1
         #Upper Edge with 3 Liberties
         elif isUpper:
@@ -255,25 +255,26 @@ class GameState():
 
     def _allowedActions(self):
         allowed = []
-        for i in range(len(self.board)):
+        allowPass = True
+        for i in range(len(self.board)-2): #-2
             if self.board[i]==0 and self._checkZeroLiberty(i):
                 allowed.append(i)
-        if(self.playerTurn == 1):
-            allowed.append(361)
-        else:
-            allowed.append(362)
+                allowPass = False
+        if(allowPass):              #Modify to only allow passes when there is no neutral places
+            allowed.append(361)     #Append 361 only
+                                    #Satisfied
                 
         return allowed
 
     def _binary(self):
-        currentplayer_position = np.zeros(len(self.board), dtype=np.int)
-        other_position = np.zeros(len(self.board), dtype=np.int)
+        currentplayer_position = np.zeros(len(self.board)-2, dtype=np.int)
+        other_position = np.zeros(len(self.board)-2, dtype=np.int)
         if(self.playerTurn == 1):
-            currentplayer_position[self.board>0] = 1
-            other_position[self.board<0] = 1
+            currentplayer_position[self.board[0:361]>0] = 1
+            other_position[self.board[0:361]<0] = 1
         else:
-            currentplayer_position[self.board<0] = 1
-            other_position[self.board>0] = 1
+            currentplayer_position[self.board[0:361]<0] = 1
+            other_position[self.board[0:361]>0] = 1
             
         position = np.append(currentplayer_position,other_position)
         return (position)
@@ -326,8 +327,7 @@ class GameState():
                 elif self.board[i] < 0:
                     current_player_liberties+=((-self.board[i])-1)           
         current_player_prisoners = self._getPrisoners(1)
-        other_player_prisoners = self._getPrisoners(0) 
-        
+        other_player_prisoners = self._getPrisoners(0)        
         current_player_score = current_player_liberties + 4*other_player_prisoners - 4*current_player_prisoners
         other_player_score = other_player_liberties + 4*current_player_prisoners - 4*other_player_prisoners
         return ((current_player_score-other_player_score),current_player_score,other_player_score)
@@ -340,13 +340,13 @@ class GameState():
     
     def takeAction(self, action):
         newBoard = np.array(self.board)
-        
-        if action == 361:
-            newBoard[action] = 1
-        elif action == 362:
-            newBoard[action] = 1
+        if action == 361:  
+            if self.playerTurn == 1:
+                newBoard[361] = 1
+            else:  
+                newBoard[362] = 1
         else:
-            newBoard[action]=(self._findActionLiberty(action))*self.playerTurn + self.playerTurn 
+            newBoard[action]=(self._findActionLiberty(action))*self.playerTurn + self.playerTurn #Update surronding pieces libereties
             newBoard[361]=0
             newBoard[362]=0
         
@@ -363,8 +363,12 @@ class GameState():
     
     
     def render(self, logger):
+        print()
+        print(self.pieces[str(self.playerTurn)] + "'s turn:")
         for r in range(19):
             logger.info([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
+            print([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
         logger.info('--------------')
+        print(self.value)
                 
 
