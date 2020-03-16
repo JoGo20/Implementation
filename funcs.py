@@ -46,9 +46,9 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
 
     for e in range(EPISODES):
 
-        logger.info('====================')
-        logger.info('EPISODE %d OF %d', e+1, EPISODES)
-        logger.info('====================')
+        #logger.info('====================')
+        #logger.info('EPISODE %d OF %d', e+1, EPISODES)
+        #logger.info('====================')
 
         #print(str(e+1) + ' ', end='')
 
@@ -68,13 +68,13 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             players = {1:{"agent": player1, "name":player1.name}
                     , -1: {"agent": player2, "name":player2.name}
                     }
-            logger.info(player1.name + ' plays as X')
+            #logger.info(player1.name + ' plays as X')
         else:
             players = {1:{"agent": player2, "name":player2.name}
                     , -1: {"agent": player1, "name":player1.name}
                     }
-            logger.info(player2.name + ' plays as X')
-            logger.info('--------------')
+            #logger.info(player2.name + ' plays as X')
+            #logger.info('--------------')
 
         env.gameState.render(logger)
 
@@ -92,13 +92,13 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                 memory.commit_stmemory(env.identities, state, pi)
 
 
-            logger.info('action: %d', action)
-            for r in range(env.grid_shape[0]):
-                logger.info(['----' if x == 0 else '{0:.2f}'.format(np.round(x,2)) for x in pi[env.grid_shape[1]*r : (env.grid_shape[1]*r + env.grid_shape[1])]])
+            #logger.info('action: %d', action)
+            #for r in range(env.grid_shape[0]):
+            #    logger.info(['----' if x == 0 else '{0:.2f}'.format(np.round(x,2)) for x in pi[env.grid_shape[1]*r : (env.grid_shape[1]*r + env.grid_shape[1])]])
             #logger.info
-            logger.info('MCTS perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(MCTS_value,2))
-            logger.info('NN perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(NN_value,2))
-            logger.info('====================')
+            #logger.info('MCTS perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(MCTS_value,2))
+            #logger.info('NN perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(NN_value,2))
+            #logger.info('====================')
 
             ### Do the action
             state, value, done, _ = env.step(action) #the value of the newState from the POV of the new playerTurn i.e. -1 if the previous player played a winning move

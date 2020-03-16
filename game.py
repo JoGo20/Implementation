@@ -366,7 +366,7 @@ class GameState():
         print()
         print(self.pieces[str(self.playerTurn)] + "'s turn:")
         for r in range(19):
-            logger.info([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
+            #logger.info([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
             print([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
         logger.info('--------------')
         print(self.value)
