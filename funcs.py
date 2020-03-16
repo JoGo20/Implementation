@@ -50,7 +50,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
         logger.info('EPISODE %d OF %d', e+1, EPISODES)
         logger.info('====================')
 
-        print (str(e+1) + ' ', end='')
+        print(str(e+1) + ' ', end='')
 
         state = env.reset()
         
