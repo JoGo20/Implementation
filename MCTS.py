@@ -120,12 +120,12 @@ class MCTS():
 			edge.stats['Q'] = edge.stats['W'] / edge.stats['N']
 
 			#lg.logger_mcts.info('updating edge with value %f for player %d... N = %d, W = %f, Q = %f'
-				, value * direction
-				, playerTurn
-				, edge.stats['N']
-				, edge.stats['W']
-				, edge.stats['Q']
-				)
+			#	, value * direction
+			#	, playerTurn
+			#	, edge.stats['N']
+			#	, edge.stats['W']
+			#	, edge.stats['Q']
+			#	)
 
 			#edge.outNode.state.render(lg.logger_mcts)
 
