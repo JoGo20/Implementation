@@ -127,7 +127,7 @@ class MCTS():
 				, edge.stats['Q']
 				)
 
-			edge.outNode.state.render(lg.logger_mcts)
+			#edge.outNode.state.render(lg.logger_mcts)
 
 	def addNode(self, node):
 		self.tree[node.id] = node

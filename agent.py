@@ -57,12 +57,12 @@ class Agent():
 	def simulate(self):
 
 		lg.logger_mcts.info('ROOT NODE...%s', self.mcts.root.state.id)
-		self.mcts.root.state.render(lg.logger_mcts)
+		#self.mcts.root.state.render(lg.logger_mcts)
 		lg.logger_mcts.info('CURRENT PLAYER...%d', self.mcts.root.state.playerTurn)
 
 		##### MOVE THE LEAF NODE
 		leaf, value, done, breadcrumbs = self.mcts.moveToLeaf()
-		leaf.state.render(lg.logger_mcts)
+		#leaf.state.render(lg.logger_mcts)
 
 		##### EVALUATE THE LEAF NODE
 		value, breadcrumbs = self.evaluateLeaf(leaf, value, done, breadcrumbs)
