@@ -164,7 +164,7 @@ class GameState():
                 
         
         #Otherwise on the board with 4 Liberties
-        if self.playerTurn == 1:
+        elif self.playerTurn == 1:
             if self.board[action+1] < 0 and self.board[action-1] < 0 and self.board[action-19] < 0 and self.board[action+19] < 0:
                 return False
         elif self.playerTurn == -1:
