@@ -172,6 +172,83 @@ class GameState():
                 return False
         
         return True
+    
+    
+    def _reduceNeighboring(self, action):
+        place = (action + 1) % 19
+        isUpper = (action >= 341)
+        isLower = (action <= 18)
+        #Upper Left Corner with 2 Liberties
+        if isUpper and place ==1:
+            if self.board[action+1] != 0:
+                self.board[action+1] -= self.playerTurn
+            if self.board[action-19] !=0:
+                self.board[action-19] -= self.playerTurn
+        #Upper Right Corner with 2 Liberties
+        elif isUpper and place ==0:
+            if self.board[action-1] != 0:
+                self.board[action-1] -= self.playerTurn
+            if self.board[action-19] !=0:
+                self.board[action-19] -= self.playerTurn
+        #Lower Left Corner with 2 Liberties
+        elif isUpper and place ==0:
+            if self.board[action+1] != 0:
+                self.board[action+1] -= self.playerTurn
+            if self.board[action+19] !=0:
+                self.board[action+19] -= self.playerTurn       
+        #Lower Right Corner with 2 Liberties
+        elif isUpper and place ==0:
+            if self.board[action-1] != 0:
+                self.board[action-1] -= self.playerTurn
+            if self.board[action+19] !=0:
+                self.board[action+19] -= self.playerTurn
+        #Upper Edge with 3 Liberties
+        elif isUpper:
+            if self.board[action-1] != 0:
+                self.board[action-1] -= self.playerTurn
+            if self.board[action-19] !=0:
+                self.board[action-19] -= self.playerTurn
+            if self.board[action+1] != 0:
+                self.board[action+1] -= self.playerTurn
+                
+        #Lower Edge with 3 Liberties
+        elif isLower:
+            
+            if self.board[action-1] != 0:
+                self.board[action-1] -= self.playerTurn
+            if  self.board[action+19] !=0:
+                self.board[action+19] -= self.playerTurn
+            if self.board[action+1] != 0:
+                self.board[action+1] -= self.playerTurn
+        
+        #Right Edge with 3 Liberties
+        elif place == 0:
+            if self.board[action-1] != 0:
+                self.board[action-1] -= self.playerTurn
+            if  self.board[action+19] !=0:
+                self.board[action+19] -= self.playerTurn
+            if self.board[action+1] != 0:
+                self.board[action+1] -= self.playerTurn
+                
+        #Left Edge with 3 Liberties
+        elif place == 1:
+            if self.board[action+1] != 0:
+                self.board[action+1] -= self.playerTurn
+            if  self.board[action-19] !=0:
+                self.board[action-19] -= self.playerTurn
+            if self.board[action+19] != 0:
+                self.board[action+19] -= self.playerTurn
+                        
+        #Otherwise on the board with 4 Liberties
+        else:
+            if self.board[action+1] != 0:
+                self.board[action+1] -= self.playerTurn
+            if self.board[action-19] !=0:
+                self.board[action-19] -= self.playerTurn
+            if self.board[action-1] != 0:
+                self.board[action-1] -= self.playerTurn
+            if self.board[action+19] !=0:
+                self.board[action+19] -= self.playerTurn
                 
     
     def _findActionLiberty(self, action):
@@ -347,6 +424,7 @@ class GameState():
                 newBoard[362] = 1
         else:
             newBoard[action]=(self._findActionLiberty(action))*self.playerTurn + self.playerTurn #Update surronding pieces libereties
+            self._reduceNeighboring(action)
             newBoard[361]=0
             newBoard[362]=0
         
