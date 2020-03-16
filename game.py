@@ -181,74 +181,74 @@ class GameState():
         #Upper Left Corner with 2 Liberties
         if isUpper and place ==1:
             if self.board[action+1] != 0:
-                self.board[action+1] -= self.playerTurn
+                self.board[action+1] -= ((self.board[action+1] > 0) - (self.board[action+1] < 0))
             if self.board[action-19] !=0:
-                self.board[action-19] -= self.playerTurn
+                self.board[action-19] -= ((self.board[action-19] > 0) - (self.board[action-19] < 0))
         #Upper Right Corner with 2 Liberties
         elif isUpper and place ==0:
             if self.board[action-1] != 0:
-                self.board[action-1] -= self.playerTurn
+                self.board[action-1] -= ((self.board[action-1] > 0) - (self.board[action-1] < 0))
             if self.board[action-19] !=0:
-                self.board[action-19] -= self.playerTurn
+                self.board[action-19] -= ((self.board[action-19] > 0) - (self.board[action-19] < 0))
         #Lower Left Corner with 2 Liberties
         elif isUpper and place ==0:
             if self.board[action+1] != 0:
-                self.board[action+1] -= self.playerTurn
+                self.board[action+1] -= ((self.board[action+1] > 0) - (self.board[action+1] < 0))
             if self.board[action+19] !=0:
-                self.board[action+19] -= self.playerTurn       
+                self.board[action+19] -= ((self.board[action+19] > 0) - (self.board[action+19] < 0))      
         #Lower Right Corner with 2 Liberties
         elif isUpper and place ==0:
             if self.board[action-1] != 0:
-                self.board[action-1] -= self.playerTurn
+                self.board[action-1] -= ((self.board[action-1] > 0) - (self.board[action-1] < 0))
             if self.board[action+19] !=0:
-                self.board[action+19] -= self.playerTurn
+                self.board[action+19] -= ((self.board[action+19] > 0) - (self.board[action+19] < 0))
         #Upper Edge with 3 Liberties
         elif isUpper:
             if self.board[action-1] != 0:
-                self.board[action-1] -= self.playerTurn
+                self.board[action-1] -= ((self.board[action-1] > 0) - (self.board[action-1] < 0))
             if self.board[action-19] !=0:
-                self.board[action-19] -= self.playerTurn
+                self.board[action-19] -= ((self.board[action-19] > 0) - (self.board[action-19] < 0))
             if self.board[action+1] != 0:
-                self.board[action+1] -= self.playerTurn
+                self.board[action+1] -= ((self.board[action+1] > 0) - (self.board[action+1] < 0))
                 
         #Lower Edge with 3 Liberties
         elif isLower:
             
             if self.board[action-1] != 0:
-                self.board[action-1] -= self.playerTurn
+                self.board[action-1] -= ((self.board[action-1] > 0) - (self.board[action-1] < 0))
             if  self.board[action+19] !=0:
-                self.board[action+19] -= self.playerTurn
+                self.board[action+19] -= ((self.board[action+19] > 0) - (self.board[action+19] < 0))
             if self.board[action+1] != 0:
-                self.board[action+1] -= self.playerTurn
+                self.board[action+1] -= ((self.board[action+1] > 0) - (self.board[action+1] < 0))
         
         #Right Edge with 3 Liberties
         elif place == 0:
             if self.board[action-1] != 0:
-                self.board[action-1] -= self.playerTurn
+                self.board[action-1] -= ((self.board[action-1] > 0) - (self.board[action-1] < 0))
             if  self.board[action+19] !=0:
-                self.board[action+19] -= self.playerTurn
+                self.board[action+19] -= ((self.board[action+19] > 0) - (self.board[action+19] < 0))
             if self.board[action+1] != 0:
-                self.board[action+1] -= self.playerTurn
+                self.board[action+1] -= ((self.board[action+1] > 0) - (self.board[action+1] < 0))
                 
         #Left Edge with 3 Liberties
         elif place == 1:
             if self.board[action+1] != 0:
-                self.board[action+1] -= self.playerTurn
+                self.board[action+1] -= ((self.board[action+1] > 0) - (self.board[action+1] < 0))
             if  self.board[action-19] !=0:
-                self.board[action-19] -= self.playerTurn
+                self.board[action-19] -= ((self.board[action-19] > 0) - (self.board[action-19] < 0))
             if self.board[action+19] != 0:
-                self.board[action+19] -= self.playerTurn
+                self.board[action+19] -= ((self.board[action+19] > 0) - (self.board[action+19] < 0))
                         
         #Otherwise on the board with 4 Liberties
         else:
             if self.board[action+1] != 0:
-                self.board[action+1] -= self.playerTurn
+                self.board[action+1] -= ((self.board[action+1] > 0) - (self.board[action+1] < 0))
             if self.board[action-19] !=0:
-                self.board[action-19] -= self.playerTurn
+                self.board[action-19] -= ((self.board[action-19] > 0) - (self.board[action-19] < 0))
             if self.board[action-1] != 0:
-                self.board[action-1] -= self.playerTurn
+                self.board[action-1] -= ((self.board[action-1] > 0) - (self.board[action-1] < 0))
             if self.board[action+19] !=0:
-                self.board[action+19] -= self.playerTurn
+                self.board[action+19] -= ((self.board[action+19] > 0) - (self.board[action+19] < 0))
                 
     
     def _findActionLiberty(self, action):
