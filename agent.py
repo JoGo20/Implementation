@@ -56,9 +56,9 @@ class Agent():
 	
 	def simulate(self):
 
-		#lg.logger_mcts.info('ROOT NODE...%s', self.mcts.root.state.id)
+		lg.logger_mcts.info('ROOT NODE...%s', self.mcts.root.state.id)
 		#self.mcts.root.state.render(lg.logger_mcts)
-		#lg.logger_mcts.info('CURRENT PLAYER...%d', self.mcts.root.state.playerTurn)
+		lg.logger_mcts.info('CURRENT PLAYER...%d', self.mcts.root.state.playerTurn)
 
 		##### MOVE THE LEAF NODE
 		leaf, value, done, breadcrumbs = self.mcts.moveToLeaf()
@@ -80,9 +80,9 @@ class Agent():
 
 		#### run the simulation
 		for sim in range(self.MCTSsimulations):
-			#lg.logger_mcts.info('***************************')
-			#lg.logger_mcts.info('****** SIMULATION %d ******', sim + 1)
-			#lg.logger_mcts.info('***************************')
+			lg.logger_mcts.info('***************************')
+			lg.logger_mcts.info('****** SIMULATION %d ******', sim + 1)
+			lg.logger_mcts.info('***************************')
 			self.simulate()
 
 		#### get action values
@@ -92,13 +92,12 @@ class Agent():
 		action, value = self.chooseAction(pi, values, tau)
 
 		nextState, _, _ = state.takeAction(action)
-
 		NN_value = -self.get_preds(nextState)[0]
 
-		#lg.logger_mcts.info('ACTION VALUES...%s', pi)
-		#lg.logger_mcts.info('CHOSEN ACTION...%d', action)
-		#lg.logger_mcts.info('MCTS PERCEIVED VALUE...%f', value)
-		#lg.logger_mcts.info('NN PERCEIVED VALUE...%f', NN_value)
+		lg.logger_mcts.info('ACTION VALUES...%s', pi)
+		lg.logger_mcts.info('CHOSEN ACTION...%d', action)
+		lg.logger_mcts.info('MCTS PERCEIVED VALUE...%f', value)
+		lg.logger_mcts.info('NN PERCEIVED VALUE...%f', NN_value)
 
 		return (action, pi, value, NN_value)
 
@@ -129,12 +128,12 @@ class Agent():
 
 	def evaluateLeaf(self, leaf, value, done, breadcrumbs):
 
-		#lg.logger_mcts.info('------EVALUATING LEAF------')
+		lg.logger_mcts.info('------EVALUATING LEAF------')
 
 		if done == 0:
 	
 			value, probs, allowedActions = self.get_preds(leaf.state)
-			#lg.logger_mcts.info('PREDICTED VALUE FOR %d: %f', leaf.state.playerTurn, value)
+			lg.logger_mcts.info('PREDICTED VALUE FOR %d: %f', leaf.state.playerTurn, value)
 
 			probs = probs[allowedActions]
 
@@ -143,16 +142,16 @@ class Agent():
 				if newState.id not in self.mcts.tree:
 					node = mc.Node(newState)
 					self.mcts.addNode(node)
-					#lg.logger_mcts.info('added node...%s...p = %f', node.id, probs[idx])
+					lg.logger_mcts.info('added node...%s...p = %f', node.id, probs[idx])
 				else:
 					node = self.mcts.tree[newState.id]
-					#lg.logger_mcts.info('existing node...%s...', node.id)
+					lg.logger_mcts.info('existing node...%s...', node.id)
 
 				newEdge = mc.Edge(leaf, node, probs[idx], action)
 				leaf.edges.append((action, newEdge))
 				
-		#else:
-			#lg.logger_mcts.info('GAME VALUE FOR %d: %f', leaf.playerTurn, value)
+		else:
+			lg.logger_mcts.info('GAME VALUE FOR %d: %f', leaf.playerTurn, value)
 
 		return ((value, breadcrumbs))
 
@@ -183,7 +182,7 @@ class Agent():
 		return action, value
 
 	def replay(self, ltmemory):
-		#lg.logger_mcts.info('******RETRAINING MODEL******')
+		lg.logger_mcts.info('******RETRAINING MODEL******')
 
 
 		for i in range(config.TRAINING_LOOPS):
@@ -194,7 +193,7 @@ class Agent():
 								, 'policy_head': np.array([row['AV'] for row in minibatch])} 
 
 			fit = self.model.fit(training_states, training_targets, epochs=config.EPOCHS, verbose=1, validation_split=0, batch_size = 32)
-			#lg.logger_mcts.info('NEW LOSS %s', fit.history)
+			lg.logger_mcts.info('NEW LOSS %s', fit.history)
 
 			self.train_overall_loss.append(round(fit.history['loss'][config.EPOCHS - 1],4))
 			self.train_value_loss.append(round(fit.history['value_head_loss'][config.EPOCHS - 1],4)) 
@@ -219,10 +218,10 @@ class Agent():
 		return preds
 
 	def buildMCTS(self, state):
-		#lg.logger_mcts.info('****** BUILDING NEW MCTS TREE FOR AGENT %s ******', self.name)
+		lg.logger_mcts.info('****** BUILDING NEW MCTS TREE FOR AGENT %s ******', self.name)
 		self.root = mc.Node(state)
 		self.mcts = mc.MCTS(self.root, self.cpuct)
 
 	def changeRootMCTS(self, state):
-		#lg.logger_mcts.info('****** CHANGING ROOT OF MCTS TREE TO %s FOR AGENT %s ******', state.id, self.name)
+		lg.logger_mcts.info('****** CHANGING ROOT OF MCTS TREE TO %s FOR AGENT %s ******', state.id, self.name)
 		self.mcts.root = self.mcts.tree[state.id]

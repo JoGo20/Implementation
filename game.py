@@ -174,81 +174,79 @@ class GameState():
         return True
     
     
-    def _reduceNeighboring(self, action):
+    def _reduceNeighboring(self, action, newBoard):
+        #print("Current action: ",action)
         place = (action + 1) % 19
         isUpper = (action >= 341)
         isLower = (action <= 18)
         #Upper Left Corner with 2 Liberties
         if isUpper and place ==1:
-            if self.board[action+1] != 0:
-                self.board[action+1] += ((self.board[action+1] > 0) - (self.board[action+1] < 0))
-            if self.board[action-19] !=0:
-                self.board[action-19] += ((self.board[action-19] > 0) - (self.board[action-19] < 0))
+            if newBoard[action+1] != 0:
+                newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
+            if newBoard[action-19] !=0:
+                newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
         #Upper Right Corner with 2 Liberties
         elif isUpper and place ==0:
-            if self.board[action-1] != 0:
-                self.board[action-1] += ((self.board[action-1] > 0) - (self.board[action-1] < 0))
-            if self.board[action-19] !=0:
-                self.board[action-19] += ((self.board[action-19] > 0) - (self.board[action-19] < 0))
+            if newBoard[action-1] != 0:
+                newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
+            if newBoard[action-19] !=0:
+                newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
         #Lower Left Corner with 2 Liberties
         elif isUpper and place ==0:
-            if self.board[action+1] != 0:
-                self.board[action+1] += ((self.board[action+1] > 0) - (self.board[action+1] < 0))
-            if self.board[action+19] !=0:
-                self.board[action+19] += ((self.board[action+19] > 0) - (self.board[action+19] < 0))      
+            if newBoard[action+1] != 0:
+                newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
+            if newBoard[action+19] !=0:
+                newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))      
         #Lower Right Corner with 2 Liberties
         elif isUpper and place ==0:
-            if self.board[action-1] != 0:
-                self.board[action-1] += ((self.board[action-1] > 0) - (self.board[action-1] < 0))
-            if self.board[action+19] !=0:
-                self.board[action+19] += ((self.board[action+19] > 0) - (self.board[action+19] < 0))
+            if newBoard[action-1] != 0:
+                newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
+            if newBoard[action+19] !=0:
+                newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
         #Upper Edge with 3 Liberties
         elif isUpper:
-            if self.board[action-1] != 0:
-                self.board[action-1] += ((self.board[action-1] > 0) - (self.board[action-1] < 0))
-            if self.board[action-19] !=0:
-                self.board[action-19] += ((self.board[action-19] > 0) - (self.board[action-19] < 0))
-            if self.board[action+1] != 0:
-                self.board[action+1] += ((self.board[action+1] > 0) - (self.board[action+1] < 0))
-                
+            if newBoard[action-1] != 0:
+                newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
+            if newBoard[action-19] !=0:
+                newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
+            if newBoard[action+1] != 0:
+                newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))      
         #Lower Edge with 3 Liberties
         elif isLower:
-            
-            if self.board[action-1] != 0:
-                self.board[action-1] += ((self.board[action-1] > 0) - (self.board[action-1] < 0))
-            if  self.board[action+19] !=0:
-                self.board[action+19] += ((self.board[action+19] > 0) - (self.board[action+19] < 0))
-            if self.board[action+1] != 0:
-                self.board[action+1] += ((self.board[action+1] > 0) - (self.board[action+1] < 0))
-        
+            if newBoard[action-1] != 0:
+                newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
+            if  newBoard[action+19] !=0:
+                newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
+            if newBoard[action+1] != 0:
+                newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
         #Right Edge with 3 Liberties
         elif place == 0:
-            if self.board[action-1] != 0:
-                self.board[action-1] += ((self.board[action-1] > 0) - (self.board[action-1] < 0))
-            if  self.board[action+19] !=0:
-                self.board[action+19] += ((self.board[action+19] > 0) - (self.board[action+19] < 0))
-            if self.board[action+1] != 0:
-                self.board[action+1] += ((self.board[action+1] > 0) - (self.board[action+1] < 0))
+            if newBoard[action-1] != 0:
+                newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
+            if  newBoard[action+19] !=0:
+                newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
+            if newBoard[action+1] != 0:
+                newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
                 
         #Left Edge with 3 Liberties
         elif place == 1:
-            if self.board[action+1] != 0:
-                self.board[action+1] += ((self.board[action+1] > 0) - (self.board[action+1] < 0))
-            if  self.board[action-19] !=0:
-                self.board[action-19] += ((self.board[action-19] > 0) - (self.board[action-19] < 0))
-            if self.board[action+19] != 0:
-                self.board[action+19] += ((self.board[action+19] > 0) - (self.board[action+19] < 0))
+            if newBoard[action+1] != 0:
+                newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
+            if  newBoard[action-19] !=0:
+                newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
+            if newBoard[action+19] != 0:
+                newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
                         
         #Otherwise on the board with 4 Liberties
         else:
-            if self.board[action+1] != 0:
-                self.board[action+1] += ((self.board[action+1] > 0) - (self.board[action+1] < 0))
-            if self.board[action-19] !=0:
-                self.board[action-19] += ((self.board[action-19] > 0) - (self.board[action-19] < 0))
-            if self.board[action-1] != 0:
-                self.board[action-1] += ((self.board[action-1] > 0) - (self.board[action-1] < 0))
-            if self.board[action+19] !=0:
-                self.board[action+19] += ((self.board[action+19] > 0) - (self.board[action+19] < 0))
+            if newBoard[action+1] != 0:
+                newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
+            if newBoard[action-19] !=0:
+                newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
+            if newBoard[action-1] != 0:
+                newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
+            if newBoard[action+19] !=0:
+                newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
                 
     
     def _findActionLiberty(self, action):
@@ -424,7 +422,7 @@ class GameState():
                 newBoard[362] = 1
         else:
             newBoard[action]=(self._findActionLiberty(action))*self.playerTurn + self.playerTurn #Update surronding pieces libereties
-            self._reduceNeighboring(action)
+            self._reduceNeighboring(action, newBoard)
             newBoard[361]=0
             newBoard[362]=0
         
@@ -445,8 +443,9 @@ class GameState():
         print(self.pieces[str(self.playerTurn)] + "'s turn:")
         for r in range(19):
             #logger.info([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
-            print(x for x in self.board[19*r : (19*r + 19)])
+            print([x for x in self.board[19*r : (19*r + 19)]])
         logger.info('--------------')
         print(self.value)
+        
                 
 
