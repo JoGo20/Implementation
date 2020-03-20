@@ -94,7 +94,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
 
             logger.info('action: %d', action)
             for r in range(env.grid_shape[0]):
-                logger.info(['----' if x == 0 else '{0:.2f}'.format(np.round(x,2)) for x in pi[env.grid_shape[1]*r : (env.grid_shape[1]*r + env.grid_shape[1])]])
+                logger.info(['----' if x == 0 else '{0:.2f}'.format(np.round(x,2)) for x in pi[env.grid_shape[1]*r : (env.grid_shape[1]*r + env.grid_shape[1])]]) 
             logger.info('MCTS perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(MCTS_value,2))
             logger.info('NN perceived value for %s: %f', state.pieces[str(state.playerTurn)] ,np.round(NN_value,2))
             logger.info('====================')
@@ -104,7 +104,8 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             
             env.gameState.render(logger)
 
-            if done == 1: 
+            if done == 1:
+                print("Done")
                 if memory != None:
                     #### If the game is finished, assign the values correctly to the game moves
                     for move in memory.stmemory:
@@ -116,7 +117,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                     memory.commit_ltmemory()
              
                 if value > 0:
-                    logger.info('%s WINS!', players[state.playerTurn]['name'])
+                    print('%s WINS!', players[state.playerTurn]['name'])
                     scores[players[state.playerTurn]['name']] = scores[players[state.playerTurn]['name']] + 1
                     if state.playerTurn == 1: 
                         sp_scores['sp'] = sp_scores['sp'] + 1
@@ -124,7 +125,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                         sp_scores['nsp'] = sp_scores['nsp'] + 1
 
                 elif value < 0:
-                    logger.info('%s WINS!', players[-state.playerTurn]['name'])
+                    print('%s WINS!', players[-state.playerTurn]['name'])
                     scores[players[-state.playerTurn]['name']] = scores[players[-state.playerTurn]['name']] + 1
                
                     if state.playerTurn == 1: 
@@ -133,7 +134,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                         sp_scores['sp'] = sp_scores['sp'] + 1
 
                 else:
-                    logger.info('DRAW...')
+                    print('DRAW...')
                     scores['drawn'] = scores['drawn'] + 1
                     sp_scores['drawn'] = sp_scores['drawn'] + 1
 
