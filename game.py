@@ -92,12 +92,14 @@ class GameState():
     def __init__(self, board, playerTurn):
         self.board = board
         self.pieces = {'1':'B', '2':'B', '3':'B', '4':'B', '5':'B', '0':'-', '-1':'W', '-2':'W', '-3':'W', '-4':'W', '-5':'W'}
+        self.visited={}
         self.playerTurn = playerTurn
         self.binary = self._binary()
         self.id = self._convertStateToId()
         self.allowedActions = self._allowedActions()
         self.isEndGame = self._checkForEndGame()
-        if(self.isEndGame):
+ 
+        if(self.isEndGame and self.playerTurn == -1):
             self.arr = ((19 * 19) * ctypes.c_int)()
             data = np.copy(self.board[0:361])
             for i, v in enumerate(data):
@@ -199,173 +201,88 @@ class GameState():
                 return False
         
         return True
+          
     
-    
-    # def _reduceNeighboring(self, action, newBoard):
-    #     #print("Current action: ",action)
-    #     place = (action + 1) % 19
-    #     isUpper = (action >= 341)
-    #     isLower = (action <= 18)
-    #     #Upper Left Corner with 2 Liberties
-    #     if isUpper and place ==1:
-    #         if newBoard[action+1] != 0:
-    #             newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
-    #         if newBoard[action-19] !=0:
-    #             newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
-    #     #Upper Right Corner with 2 Liberties
-    #     elif isUpper and place ==0:
-    #         if newBoard[action-1] != 0:
-    #             newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
-    #         if newBoard[action-19] !=0:
-    #             newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
-    #     #Lower Left Corner with 2 Liberties
-    #     elif isUpper and place ==0:
-    #         if newBoard[action+1] != 0:
-    #             newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
-    #         if newBoard[action+19] !=0:
-    #             newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))      
-    #     #Lower Right Corner with 2 Liberties
-    #     elif isUpper and place ==0:
-    #         if newBoard[action-1] != 0:
-    #             newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
-    #         if newBoard[action+19] !=0:
-    #             newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
-    #     #Upper Edge with 3 Liberties
-    #     elif isUpper:
-    #         if newBoard[action-1] != 0:
-    #             newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
-    #         if newBoard[action-19] !=0:
-    #             newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
-    #         if newBoard[action+1] != 0:
-    #             newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))      
-    #     #Lower Edge with 3 Liberties
-    #     elif isLower:
-    #         if newBoard[action-1] != 0:
-    #             newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
-    #         if  newBoard[action+19] !=0:
-    #             newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
-    #         if newBoard[action+1] != 0:
-    #             newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
-    #     #Right Edge with 3 Liberties
-    #     elif place == 0:
-    #         if newBoard[action-1] != 0:
-    #             newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
-    #         if  newBoard[action+19] !=0:
-    #             newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
-    #         if newBoard[action+1] != 0:
-    #             newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
+    def _isNeutralPlace(self, action):
+        if action in self.visited:
+            return self.visited[action]
+        self.visited[action] = -1
+        place = (action + 1) % 19
+        isUpper = (action >= 341)
+        isLower = (action <= 18)
+        if place == 1 or place == 0 or isUpper or isLower:
+            self.visited[action] = 2
+            return 2
+        elif self.board[action] == 1:
+            self.visited[action] = 3
+            return 3
+        elif self.board[action] == -1:
+            self.visited[action] = 4
+            return 4
+        else:
+            if self.board[action] == 0:
+                p =[]
+                p.append(self._isNeutralPlace(action+1))
+                p.append(self._isNeutralPlace(action-1))
+                p.append(self._isNeutralPlace(action+19))
+                p.append(self._isNeutralPlace(action-19))
                 
-    #     #Left Edge with 3 Liberties
-    #     elif place == 1:
-    #         if newBoard[action+1] != 0:
-    #             newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
-    #         if  newBoard[action-19] !=0:
-    #             newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
-    #         if newBoard[action+19] != 0:
-    #             newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
-                        
-    #     #Otherwise on the board with 4 Liberties
-    #     else:
-    #         if newBoard[action+1] != 0:
-    #             newBoard[action+1] -= (int(newBoard[action+1] > 0) - int(newBoard[action+1] < 0))
-    #         if newBoard[action-19] !=0:
-    #             newBoard[action-19] -= (int(newBoard[action-19] > 0) - int(newBoard[action-19] < 0))
-    #         if newBoard[action-1] != 0:
-    #             newBoard[action-1] -= (int(newBoard[action-1] > 0) - int(newBoard[action-1] < 0))
-    #         if newBoard[action+19] !=0:
-    #             newBoard[action+19] -= (int(newBoard[action+19] > 0) - int(newBoard[action+19] < 0))
+                blackExist = False
+                whiteExist = False
+                emptyBoard = True
+                border = False
+                stillEmpty = False
                 
-    
-    # def _findActionLiberty(self, action):
-    #     place = (action + 1) % 19
-    #     isUpper = (action >= 341)
-    #     isLower = (action <= 18)
-    #     liberties = 0
-    #     #Upper Left Corner with 2 Liberties
-    #     if isUpper and place ==1:
-    #         if self.board[action+1] == 0:
-    #             liberties += 1
-    #         if  self.board[action-19] ==0:
-    #             liberties += 1
-    #     #Upper Right Corner with 2 Liberties
-    #     elif isUpper and place ==0:
-    #         if self.board[action-1] == 0:
-    #             liberties += 1
-    #         if  self.board[action-19] ==0:
-    #             liberties += 1
-    #     #Lower Left Corner with 2 Liberties
-    #     elif isUpper and place ==0:
-    #         if self.board[action+1] == 0:
-    #             liberties += 1
-    #         if  self.board[action+19] ==0:
-    #             liberties += 1         
-    #     #Lower Right Corner with 2 Liberties
-    #     elif isUpper and place ==0:
-    #         if self.board[action-1] == 0:
-    #             liberties += 1
-    #         if  self.board[action+19] ==0:
-    #             liberties += 1
-    #     #Upper Edge with 3 Liberties
-    #     elif isUpper:
-    #         if self.board[action-1] == 0:
-    #             liberties += 1
-    #         if  self.board[action-19] ==0:
-    #             liberties += 1
-    #         if self.board[action+1] == 0:
-    #             liberties += 1
+                for pVal in p:
+                    if pVal == 3:
+                        blackExist = True
+                        emptyBoard = False
+                    elif pVal == 4:
+                        whiteExist = True
+                        emptyBoard = False
+                    elif pVal == 1:
+                        return 1
+                    elif pVal == 2:
+                        border = True
+                    elif pVal == -1:
+                        stillEmpty = True
                 
-    #     #Lower Edge with 3 Liberties
-    #     elif isLower:
-            
-    #         if self.board[action-1] == 0:
-    #             liberties += 1
-    #         if  self.board[action+19] ==0:
-    #             liberties += 1
-    #         if self.board[action+1] == 0:
-    #             liberties += 1
+                if blackExist and whiteExist:
+                    self.visited[action] = 1
+                    return 1                                                     #Neutral Place
+                elif emptyBoard:
+                    self.visited[action] = -1
+                    return -1
+                elif blackExist:
+                    self.visited[action] = 3
+                    return 3
+                elif whiteExist:
+                    self.visited[action] = 4
+                    return 4
+                elif border:
+                    self.visited[action] = 2
+                    return 2
+                elif stillEmpty:
+                    self.visited[action] = -1
+                    return -1
+                else:
+                    self.visited[action] = 0
+                    return 0
         
-    #     #Right Edge with 3 Liberties
-    #     elif place == 0:
-    #         if self.board[action-1] == 0:
-    #             liberties += 1
-    #         if  self.board[action+19] ==0:
-    #             liberties += 1
-    #         if self.board[action+1] == 0:
-    #             liberties += 1
                 
-    #     #Left Edge with 3 Liberties
-    #     elif place == 1:
-    #         if self.board[action+1] == 0:
-    #             liberties += 1
-    #         if  self.board[action-19] ==0:
-    #             liberties += 1
-    #         if self.board[action+19] == 0:
-    #             liberties += 1
-                        
-    #     #Otherwise on the board with 4 Liberties
-    #     else:
-    #         if self.board[action+1] == 0:
-    #             liberties += 1
-    #         if  self.board[action-19] ==0:
-    #             liberties += 1
-    #         if self.board[action-1] == 0:
-    #             liberties += 1
-    #         if  self.board[action+19] ==0:
-    #             liberties += 1
-        
-    #     return liberties
+                
 
     def _allowedActions(self):
         allowed = []
         for i in range(len(self.board)-2): #-2
-            if self.board[i]==0 and self._checkZeroLiberty(i):
+            val = self._isNeutralPlace(i)
+            if (val==1 or val==-1 or val==2) and self.board[i]==0:
                 allowed.append(i)
-
-        if(len(allowed)==0):
-            if self.playerTurn == 1:
-                allowed.append(361)
-            else:
-                allowed.append(362)
+                
+        if self.playerTurn == 1:
+            allowed.append(361)
+        else:
+            allowed.append(362)
     
                              
         #Modify to only allow passes when there is no neutral places
@@ -402,8 +319,7 @@ class GameState():
         return id
     
     def _checkForEndGame(self):
-        if(self.board[361]==1 or self.board[362]==-1):
-            print("Game Finished")
+        if(self.board[361]==1 and self.board[362]==-1):
             return 1
         return 0
     
@@ -461,6 +377,10 @@ class GameState():
     def takeAction(self, action):
         newBoard = np.array(self.board)
         newBoard[action]=self.playerTurn
+        
+        if action != 361 and action != 362:
+            newBoard[361] = 0
+            newBoard[362] = 0
         
         newState = GameState(newBoard, -self.playerTurn)
         value = 0

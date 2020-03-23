@@ -12,6 +12,8 @@ import config
 import pickle
 from settings import run_folder, run_archive_folder
 
+
+
 def playMatchesBetweenVersions(env, run_version, player1version, player2version, EPISODES, logger, turns_until_tau0, goes_first = 0):
     
     if player1version == -1:
