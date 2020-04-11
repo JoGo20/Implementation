@@ -40,12 +40,9 @@ class Agent():
 		self.action_size = action_size
 
 		self.cpuct = cpuct
-
 		self.MCTSsimulations = mcts_simulations
 		self.model = model
-
 		self.mcts = None
-
 		self.train_overall_loss = []
 		self.train_value_loss = []
 		self.train_policy_loss = []
