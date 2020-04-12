@@ -70,6 +70,10 @@ class Game:
     
 
     def step(self, action):
+        if action == 361:
+            self.gameState.game_score -= 1
+        elif action == 362:
+            self.gameState.game_score +=1
         next_state, value, done = self.gameState.takeAction(action)
         self.gameState = next_state
         self.currentPlayer = -self.currentPlayer
@@ -325,9 +329,8 @@ class GameState():
 
     def _generateLibMap(self, element, turn, action):
         #visited=np.full(361,-1)
-        newarr=np.array(np.zeros(361), dtype=np.int)
-        del self.processed[:]
         connected = []
+        newarr=np.array(np.zeros(361), dtype=np.int)
         def findLiberty(i,typ,taken,vis, action):
             if i in vis:
                 return 0
@@ -347,7 +350,6 @@ class GameState():
                 else:
                     action = i
                     connected.append(i)
-                    self.processed.append(i)
                     place = (i) % 19
                     isLower = (i >= 342)
                     isUpper = (i <= 18)
@@ -369,14 +371,14 @@ class GameState():
                         return findLiberty(i+1,typ,taken,vis,action)+findLiberty(i-1,typ,taken,vis,action)+findLiberty(i-19,typ,taken,vis,action)
                     else:
                         return findLiberty(i+1,typ,taken,vis,action)+findLiberty(i-1,typ,taken,vis,action)+findLiberty(i+19,typ,taken,vis,action)+findLiberty(i-19,typ,taken,vis,action)
-        def calcliberty(action):
-                taken=[]
-                vis=[]
-                typ = turn
-                place = (action) % 19
-                isLower = (action >= 342)
-                isUpper = (action <= 18)
-                    
+        def calcliberty(action, connected):  
+            taken=[]
+            vis=[]
+            typ = turn
+            place = (action) % 19
+            isLower = (action >= 342)
+            isUpper = (action <= 18)
+            if element[action] == typ:
                 if action == 0:
                     liberty = findLiberty(action+1,typ,taken,vis,action)+findLiberty(action+19,typ,taken,vis,action)
                 elif action==18:
@@ -397,12 +399,147 @@ class GameState():
                     liberty = findLiberty(action+1,typ,taken,vis,action)+findLiberty(action-1,typ,taken,vis,action)+findLiberty(action+19,typ,taken,vis,action)+findLiberty(action-19,typ,taken,vis,action)
                 
                 newarr[connected] = (liberty+1)
+                newarr[action] =  (liberty+1)
+            
+            else:
+                if action == 0:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif action==18:
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+
+                elif action==342:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+
+                elif action==360:
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif place == 0:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif place == 18:
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif isUpper:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif isLower:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                else:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
                 
-                if element[action] == typ:
-                    newarr[action] =  (liberty+1)
-                del connected[:]
-                return newarr  
-        out=calcliberty(action)
+            del connected[:]
+            del vis[:]
+            del taken[:]
+            return newarr  
+        out=calcliberty(action, connected)
         return out
     
     def _checkAllowance(self, action):
@@ -416,7 +553,8 @@ class GameState():
         if any(i > 0 for i in (nextLib - currLib)):
             if tempBoard in self.board_history:
                 return False
-        return True
+            return True
+        return False
             
 
             
@@ -541,11 +679,10 @@ class GameState():
                 self.game_score+=deadCount
             else:
                 self.game_score-=deadCount
-        elif action == 361:
-            self.game_score -= 1
-        else:
-            self.game_score +=1
-            
+        # elif action == 361:
+        #     self.game_score -= 1
+        # else:
+        #     self.game_score +=1
             
         if len(self.board_history) > 3:
             del self.board_history[:]
