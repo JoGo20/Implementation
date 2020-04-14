@@ -10,6 +10,9 @@ from keras.models import Sequential, load_model, Model
 from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
 from keras.optimizers import SGD
 from keras import regularizers
+from tensorflow import Graph, Session
+import tensorflow as tf
+import keras
 
 from loss import softmax_cross_entropy_with_logits
 
@@ -27,7 +30,11 @@ class Gen_Model():
 		self.output_dim = output_dim
 
 	def predict(self, x):
-		return self.model.predict(x)
+		with self.graph.as_default():
+			with self.session.as_default():
+				prediction = self.model.predict(x)
+		return prediction
+
 
 	def fit(self, states, targets, epochs, verbose, validation_split, batch_size):
 		return self.model.fit(states, targets, epochs=epochs, verbose=verbose, validation_split = validation_split, batch_size = batch_size)
@@ -111,7 +118,7 @@ class Residual_CNN(Gen_Model):
 		Gen_Model.__init__(self, reg_const, learning_rate, input_dim, output_dim)
 		self.hidden_layers = hidden_layers
 		self.num_layers = len(hidden_layers)
-		self.model = self._build_model()
+		self.model, self.graph, self.session = self._build_model()
 
 	def residual_layer(self, input_block, filters, kernel_size):
 
@@ -219,25 +226,26 @@ class Residual_CNN(Gen_Model):
 		return (x)
 
 	def _build_model(self):
+		thread_graph = Graph()
+		with thread_graph.as_default():
+			thread_session = Session()
+			with thread_session.as_default():
+				main_input = Input(shape = self.input_dim, name = 'main_input')
+				x = self.conv_layer(main_input, self.hidden_layers[0]['filters'], self.hidden_layers[0]['kernel_size'])
+				if len(self.hidden_layers) > 1:
+					for h in self.hidden_layers[1:]:
+						x = self.residual_layer(x, h['filters'], h['kernel_size'])
+				vh = self.value_head(x)
+				ph = self.policy_head(x)
+				model = Model(inputs=[main_input], outputs=[vh, ph])
+				model.compile(loss={'value_head': 'mean_squared_error', 'policy_head': softmax_cross_entropy_with_logits},
+				optimizer=SGD(lr=self.learning_rate, momentum = config.MOMENTUM),	
+				loss_weights={'value_head': 0.5, 'policy_head': 0.5}	
+				)
+				graph = tf.get_default_graph()
+		return model, graph, thread_session
 
-		main_input = Input(shape = self.input_dim, name = 'main_input')
-
-		x = self.conv_layer(main_input, self.hidden_layers[0]['filters'], self.hidden_layers[0]['kernel_size'])
-
-		if len(self.hidden_layers) > 1:
-			for h in self.hidden_layers[1:]:
-				x = self.residual_layer(x, h['filters'], h['kernel_size'])
-
-		vh = self.value_head(x)
-		ph = self.policy_head(x)
-
-		model = Model(inputs=[main_input], outputs=[vh, ph])
-		model.compile(loss={'value_head': 'mean_squared_error', 'policy_head': softmax_cross_entropy_with_logits},
-			optimizer=SGD(lr=self.learning_rate, momentum = config.MOMENTUM),	
-			loss_weights={'value_head': 0.5, 'policy_head': 0.5}	
-			)
-
-		return model
+		
 
 	def convertToModelInput(self, state):
 		inputToModel =  state.binary #np.append(state.binary, [(state.playerTurn + 1)/2] * self.input_dim[1] * self.input_dim[2])

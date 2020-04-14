@@ -52,28 +52,28 @@ else:
 current_NN = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, (2,) + env.grid_shape,   env.action_size, config.HIDDEN_CNN_LAYERS)
 best_NN = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, (2,) +  env.grid_shape,   env.action_size, config.HIDDEN_CNN_LAYERS)
 
-#If loading an existing neural netwrok, set the weights from that model
-if initialise.INITIAL_MODEL_VERSION != None:
-    best_player_version  = initialise.INITIAL_MODEL_VERSION
-    print('LOADING MODEL VERSION ' + str(initialise.INITIAL_MODEL_VERSION) + '...')
-    m_tmp = best_NN.read(env.name, initialise.INITIAL_RUN_NUMBER, best_player_version)
-    current_NN.model.set_weights(m_tmp.get_weights())
-    best_NN.model.set_weights(m_tmp.get_weights())
-#otherwise just ensure the weights on the two players are the same
-else:
-    best_player_version = 0
-    best_NN.model.set_weights(current_NN.model.get_weights())
+# #If loading an existing neural netwrok, set the weights from that model
+# if initialise.INITIAL_MODEL_VERSION != None:
+#     best_player_version  = initialise.INITIAL_MODEL_VERSION
+#     print('LOADING MODEL VERSION ' + str(initialise.INITIAL_MODEL_VERSION) + '...')
+#     m_tmp = best_NN.read(env.name, initialise.INITIAL_RUN_NUMBER, best_player_version)
+#     current_NN.model.set_weights(m_tmp.get_weights())
+#     best_NN.model.set_weights(m_tmp.get_weights())
+# #otherwise just ensure the weights on the two players are the same
+# else:
+#     best_player_version = 0
+#     best_NN.model.set_weights(current_NN.model.get_weights())
 
-#copy the config file to the run folder
-copyfile('./config.py', run_folder + 'config.py')
+# #copy the config file to the run folder
+# copyfile('./config.py', run_folder + 'config.py')
 #plot_model(current_NN.model, to_file=run_folder + 'models/model.png', show_shapes = True)
-
+best_player_version = 0
 print('\n')
 
 ######## CREATE THE PLAYERS ########
 
-current_player = Agent('current_player', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, current_NN)
-best_player = Agent('best_player', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, best_NN)
+current_player = Agent('current_player', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, current_NN, env)
+best_player = Agent('best_player', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, best_NN, env)
 #user_player = User('player1', env.state_size, env.action_size)
 iteration = 0
 

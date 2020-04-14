@@ -2,7 +2,7 @@
 
 import numpy as np
 import random
-
+import threading
 import MCTS as mc
 from game import GameState
 from loss import softmax_cross_entropy_with_logits
@@ -14,6 +14,7 @@ import time
 import matplotlib.pyplot as plt
 from IPython import display
 import pylab as pl
+from model import Residual_CNN
 
 
 class User():
@@ -33,54 +34,72 @@ class User():
 
 
 class Agent():
-	def __init__(self, name, state_size, action_size, mcts_simulations, cpuct, model):
+	def __init__(self, name, state_size, action_size, mcts_simulations, cpuct, model, env):
 		self.name = name
-
+		self.threads_n = 5
 		self.state_size = state_size
 		self.action_size = action_size
 
 		self.cpuct = cpuct
 		self.MCTSsimulations = mcts_simulations
-		self.model = model
-		self.mcts = None
+		self.models = [model, None, None, None, None, None]
+		self.threads_trees = [None, None, None, None, None, None]
+		self.mcts = self.threads_trees[0]
 		self.train_overall_loss = []
 		self.train_value_loss = []
 		self.train_policy_loss = []
 		self.val_overall_loss = []
 		self.val_value_loss = []
 		self.val_policy_loss = []
+		self.env = env
 
 	
-	def simulate(self):
+	def simulate(self, thread_id, state):
 
-		# lg.logger_mcts.info('ROOT NODE...%s', self.mcts.root.state.id)
-		# #self.mcts.root.state.render(lg.logger_mcts)
-		# lg.logger_mcts.info('CURRENT PLAYER...%d', self.mcts.root.state.playerTurn)
+		sim_n = int(self.MCTSsimulations/5)
+		self.models[thread_id] = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, (2,) + self.env.grid_shape,   self.env.action_size, config.HIDDEN_CNN_LAYERS)
+		if self.threads_trees[thread_id] == None or state.id not in self.threads_trees[thread_id].tree:
+			self.buildMCTS(state, thread_id)
+		else:
+			self.changeRootMCTS(state, thread_id) 
+		for i in range(sim_n):
+			##### MOVE THE LEAF NODE
+			leaf, value, done, breadcrumbs = self.threads_trees[thread_id].moveToLeaf()
+			#leaf.state.render(lg.logger_mcts)
 
-		##### MOVE THE LEAF NODE
-		leaf, value, done, breadcrumbs = self.mcts.moveToLeaf()
-		#leaf.state.render(lg.logger_mcts)
+			##### EVALUATE THE LEAF NODE
+			value, breadcrumbs = self.evaluateLeaf(leaf, value, done, breadcrumbs, thread_id)
 
-		##### EVALUATE THE LEAF NODE
-		value, breadcrumbs = self.evaluateLeaf(leaf, value, done, breadcrumbs)
-
-		##### BACKFILL THE VALUE THROUGH THE TREE
-		self.mcts.backFill(leaf, value, breadcrumbs)
+			##### BACKFILL THE VALUE THROUGH THE TREE
+			self.threads_trees[thread_id].backFill(leaf, value, breadcrumbs)
 
 
 	def act(self, state, tau):
-
-		if self.mcts == None or state.id not in self.mcts.tree:
-			self.buildMCTS(state)
+		
+		if self.threads_trees[0] == None or state.id not in self.threads_trees[0].tree:
+			self.buildMCTS(state, 0)
 		else:
-			self.changeRootMCTS(state)
+			self.changeRootMCTS(state, 0)
+		
 
 		#### run the simulation
-		for sim in range(self.MCTSsimulations):
+		threads = []
+		for sim in range(self.threads_n):
 			# lg.logger_mcts.info('***************************')
 			# lg.logger_mcts.info('****** SIMULATION %d ******', sim + 1)
 			# lg.logger_mcts.info('***************************')
-			self.simulate()
+			
+			threads.append(threading.Thread(target=self.simulate, args=(sim+1, state, )))
+			threads[sim].start()
+
+		for sim in range(self.threads_n):
+			threads[sim].join()
+
+		self.mcts = self.threads_trees[1]
+		
+		for sim in range(self.threads_n):
+			self.mcts.tree.update(self.threads_trees[sim+1].tree)
+			self.threads_trees[sim+1].tree.clear()
 
 		#### get action values
 		pi, values = self.getAV(1)
@@ -89,7 +108,7 @@ class Agent():
 		action, value = self.chooseAction(pi, values, tau)
 
 		nextState, _, _ = state.takeAction(action)
-		NN_value = -self.get_preds(nextState)[0]
+		NN_value = -self.get_preds(nextState, 0)[0]
 
 		# lg.logger_mcts.info('ACTION VALUES...%s', pi)
 		# lg.logger_mcts.info('CHOSEN ACTION...%d', action)
@@ -99,11 +118,11 @@ class Agent():
 		return (action, pi, value, NN_value)
 
 
-	def get_preds(self, state):
+	def get_preds(self, state, thread_id):
 		#predict the leaf
-		inputToModel = np.array([self.model.convertToModelInput(state)])
+		inputToModel = np.array([self.models[thread_id].convertToModelInput(state)])
 
-		preds = self.model.predict(inputToModel)
+		preds = self.models[thread_id].predict(inputToModel)
 		value_array = preds[0]
 		logits_array = preds[1]
 		value = value_array[0]
@@ -123,25 +142,25 @@ class Agent():
 		return ((value, probs, allowedActions))
 
 
-	def evaluateLeaf(self, leaf, value, done, breadcrumbs):
+	def evaluateLeaf(self, leaf, value, done, breadcrumbs, thread_id):
 
 		# lg.logger_mcts.info('------EVALUATING LEAF------')
 
 		if done == 0:
 	
-			value, probs, allowedActions = self.get_preds(leaf.state)
+			value, probs, allowedActions = self.get_preds(leaf.state, thread_id)
 			# lg.logger_mcts.info('PREDICTED VALUE FOR %d: %f', leaf.state.playerTurn, value)
 
 			probs = probs[allowedActions]
 
 			for idx, action in enumerate(allowedActions):
 				newState, _, _ = leaf.state.takeAction(action)
-				if newState.id not in self.mcts.tree:
+				if newState.id not in self.threads_trees[thread_id].tree:
 					node = mc.Node(newState)
-					self.mcts.addNode(node)
+					self.threads_trees[thread_id].addNode(node)
 					# lg.logger_mcts.info('added node...%s...p = %f', node.id, probs[idx])
 				else:
-					node = self.mcts.tree[newState.id]
+					node = self.threads_trees[thread_id].tree[newState.id]
 					# lg.logger_mcts.info('existing node...%s...', node.id)
 
 				newEdge = mc.Edge(leaf, node, probs[idx], action)
@@ -187,11 +206,11 @@ class Agent():
 		for i in range(config.TRAINING_LOOPS):
 			minibatch = random.sample(ltmemory, min(config.BATCH_SIZE, len(ltmemory)))
 
-			training_states = np.array([self.model.convertToModelInput(row['state']) for row in minibatch])
+			training_states = np.array([self.models[0].convertToModelInput(row['state']) for row in minibatch])
 			training_targets = {'value_head': np.array([row['value'] for row in minibatch])
 								, 'policy_head': np.array([row['AV'] for row in minibatch])} 
 
-			fit = self.model.fit(training_states, training_targets, epochs=config.EPOCHS, verbose=1, validation_split=0, batch_size = 32)
+			fit = self.models[0].fit(training_states, training_targets, epochs=config.EPOCHS, verbose=1, validation_split=0, batch_size = 32)
 			# lg.logger_mcts.info('NEW LOSS %s', fit.history)
 
 			self.train_overall_loss.append(round(fit.history['loss'][config.EPOCHS - 1],4))
@@ -210,17 +229,17 @@ class Agent():
 		time.sleep(1.0)
 
 		print('\n')
-		self.model.printWeightAverages()
+		self.models[0].printWeightAverages()
 
-	def predict(self, inputToModel):
-		preds = self.model.predict(inputToModel)
+	def predict(self, inputToModel, thread_id):
+		preds = self.models[thread_id].predict(inputToModel)
 		return preds
 
-	def buildMCTS(self, state):
+	def buildMCTS(self, state, thread_id):
 		# lg.logger_mcts.info('****** BUILDING NEW MCTS TREE FOR AGENT %s ******', self.name)
-		self.root = mc.Node(state)
-		self.mcts = mc.MCTS(self.root, self.cpuct)
+		root = mc.Node(state)
+		self.threads_trees[thread_id] = mc.MCTS(root, self.cpuct)
 
-	def changeRootMCTS(self, state):
+	def changeRootMCTS(self, state, thread_id):
 		# lg.logger_mcts.info('****** CHANGING ROOT OF MCTS TREE TO %s FOR AGENT %s ******', state.id, self.name)
-		self.mcts.root = self.mcts.tree[state.id]
+		self.threads_trees[thread_id].root = self.threads_trees[thread_id].tree[state.id]
