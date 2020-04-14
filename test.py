@@ -1,4 +1,17 @@
 import numpy as np
+import ctypes
+import logging
+import threading
+import config
+from typing import List
+import ctypes
+
+_estimator_so = ctypes.cdll.LoadLibrary('./score_estimator.so')
+
+# Color.h
+EMPTY = 0
+BLACK = 1
+WHITE = -1
 
 def _generateLibMap(element, turn, action):
 
@@ -245,9 +258,17 @@ inp = np.array([
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ])
 
-print(_checkAllowance(inp, -1, 1))
+
+arr = ((19 * 19) * ctypes.c_int)()
+data = np.copy(inp)
+for i, v in enumerate(data):
+    arr[i] = v
+score = _estimator_so.estimate(19, 19, arr, 2, 100,ctypes.c_float(0.8))
+print("Estimated board score: ", score)
+data[:] = arr
+

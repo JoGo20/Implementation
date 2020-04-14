@@ -43,17 +43,17 @@ class Gen_Model():
 		for i, l in enumerate(layers):
 			try:
 				x = l.get_weights()[0]
-				lg.logger_model.info('WEIGHT LAYER %d: ABSAV = %f, SD =%f, ABSMAX =%f, ABSMIN =%f', i, np.mean(np.abs(x)), np.std(x), np.max(np.abs(x)), np.min(np.abs(x)))
+				# lg.logger_model.info('WEIGHT LAYER %d: ABSAV = %f, SD =%f, ABSMAX =%f, ABSMIN =%f', i, np.mean(np.abs(x)), np.std(x), np.max(np.abs(x)), np.min(np.abs(x)))
 			except:
 				pass
-		lg.logger_model.info('------------------')
+		# lg.logger_model.info('------------------')
 		for i, l in enumerate(layers):
 			try:
 				x = l.get_weights()[1]
-				lg.logger_model.info('BIAS LAYER %d: ABSAV = %f, SD =%f, ABSMAX =%f, ABSMIN =%f', i, np.mean(np.abs(x)), np.std(x), np.max(np.abs(x)), np.min(np.abs(x)))
+				# lg.logger_model.info('BIAS LAYER %d: ABSAV = %f, SD =%f, ABSMAX =%f, ABSMIN =%f', i, np.mean(np.abs(x)), np.std(x), np.max(np.abs(x)), np.min(np.abs(x)))
 			except:
 				pass
-		lg.logger_model.info('******************')
+		# lg.logger_model.info('******************')
 
 
 	def viewLayers(self):
@@ -103,7 +103,7 @@ class Gen_Model():
 
 			plt.show()
 				
-		lg.logger_model.info('------------------')
+		# lg.logger_model.info('------------------')
 
 
 class Residual_CNN(Gen_Model):

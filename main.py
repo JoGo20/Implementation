@@ -26,9 +26,9 @@ import pickle
 
 
 
-lg.logger_main.info('=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*')
-lg.logger_main.info('=*=*=*=*=*=.      NEW LOG      =*=*=*=*=*')
-lg.logger_main.info('=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*')
+# lg.logger_main.info('=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*')
+# lg.logger_main.info('=*=*=*=*=*=.      NEW LOG      =*=*=*=*=*')
+# lg.logger_main.info('=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*')
 
 env = Game()
 
@@ -85,7 +85,7 @@ while 1:
     
     print('ITERATION NUMBER ' + str(iteration))
     
-    lg.logger_main.info('BEST PLAYER VERSION: %d', best_player_version)
+    # lg.logger_main.info('BEST PLAYER VERSION: %d', best_player_version)
     print('BEST PLAYER VERSION ' + str(best_player_version))
 
     ######## SELF PLAY ########
@@ -105,9 +105,9 @@ while 1:
         if iteration % 5 == 0:
             pickle.dump( memory, open( run_folder + "memory/memory" + str(iteration).zfill(4) + ".p", "wb" ) )
 
-        lg.logger_memory.info('====================')
-        lg.logger_memory.info('NEW MEMORIES')
-        lg.logger_memory.info('====================')
+        # lg.logger_memory.info('====================')
+        # lg.logger_memory.info('NEW MEMORIES')
+        # lg.logger_memory.info('====================')
         
         memory_samp = random.sample(memory.ltmemory, min(1000, len(memory.ltmemory)))
         
@@ -115,14 +115,14 @@ while 1:
             current_value, current_probs, _ = current_player.get_preds(s['state'])
             best_value, best_probs, _ = best_player.get_preds(s['state'])
 
-            lg.logger_memory.info('MCTS VALUE FOR %s: %f', s['playerTurn'], s['value'])
-            lg.logger_memory.info('CUR PRED VALUE FOR %s: %f', s['playerTurn'], current_value)
-            lg.logger_memory.info('BES PRED VALUE FOR %s: %f', s['playerTurn'], best_value)
-            lg.logger_memory.info('THE MCTS ACTION VALUES: %s', ['%.2f' % elem for elem in s['AV']]  )
-            lg.logger_memory.info('CUR PRED ACTION VALUES: %s', ['%.2f' % elem for elem in  current_probs])
-            lg.logger_memory.info('BES PRED ACTION VALUES: %s', ['%.2f' % elem for elem in  best_probs])
-            lg.logger_memory.info('ID: %s', s['state'].id)
-            lg.logger_memory.info('INPUT TO MODEL: %s', current_player.model.convertToModelInput(s['state']))
+            # lg.logger_memory.info('MCTS VALUE FOR %s: %f', s['playerTurn'], s['value'])
+            # lg.logger_memory.info('CUR PRED VALUE FOR %s: %f', s['playerTurn'], current_value)
+            # lg.logger_memory.info('BES PRED VALUE FOR %s: %f', s['playerTurn'], best_value)
+            # lg.logger_memory.info('THE MCTS ACTION VALUES: %s', ['%.2f' % elem for elem in s['AV']]  )
+            # lg.logger_memory.info('CUR PRED ACTION VALUES: %s', ['%.2f' % elem for elem in  current_probs])
+            # lg.logger_memory.info('BES PRED ACTION VALUES: %s', ['%.2f' % elem for elem in  best_probs])
+            # lg.logger_memory.info('ID: %s', s['state'].id)
+            # lg.logger_memory.info('INPUT TO MODEL: %s', current_player.model.convertToModelInput(s['state']))
 
             s['state'].render(lg.logger_memory)
             
