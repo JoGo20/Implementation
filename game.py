@@ -47,7 +47,7 @@ class Game:
         # 2 STATE SPACES FOR BOTH PLAYER TO PASS THEIR TURN.
         # 363 STATE SPACE. 0 TO 362
         self.board_history = []
-        self.game_score = 0
+        self.game_score = [0,0,0]
         self.gameState=GameState(np.array(np.zeros(363),dtype=np.int),1,self.board_history,  self.game_score)
         self.board_history.append(self.gameState.board[0:361])
         self.actionSpace = np.array(np.zeros(363), dtype = np.int)
@@ -64,6 +64,7 @@ class Game:
 
     def reset(self):
         del self.board_history[:]
+        self.game_score = [0,0,0]
         self.gameState = GameState(np.array(np.zeros(363), dtype = np.int), 1,self.board_history,  self.game_score)
         self.currentPlayer = 1
         return self.gameState
@@ -119,8 +120,10 @@ class GameState():
         self.board_history = board_history
         self.allowedActions = []
         self._allowedActions()
+        self.game_score = [0,0,0]
+        self.perv_score = game_score
         self.isEndGame = self._checkForEndGame()
-        self.game_score = game_score
+
 
  
         if(self.isEndGame and self.playerTurn == -1):
@@ -128,13 +131,13 @@ class GameState():
             data = np.copy(self.board[0:361])
             for i, v in enumerate(data):
                 self.arr[i] = v
-                score = _estimator_so.estimate(19, 19, self.arr, self.playerTurn, 1000,ctypes.c_float(0.4))
-                data[:] = self.arr
-                current_player_score = self.playerTurn*score
-                other_player_score = -self.playerTurn*score
-                self.value = (current_player_score,current_player_score,other_player_score)
+            score = _estimator_so.estimate(19, 19, self.arr, self.playerTurn, 1000,ctypes.c_float(0.4))
+            data[:] = self.arr
+            current_player_score = self.playerTurn*score + self.perv_score[0]
+            other_player_score = -self.playerTurn*score - self.perv_score[0]
+            self.value = (current_player_score,current_player_score,other_player_score)
         else:
-            self.value = (self.playerTurn*self.game_score,self.playerTurn*self.game_score,-self.playerTurn*self.game_score)
+            self.value = self.perv_score
         self.score = self._getScore()
         #self.estimate.__annotations__ = { 'width': int, 'height': int, 'data': List[int], 'player_to_move': int, 'trials': int, 'tolerance': float, 'return': int,} 
     
@@ -325,9 +328,8 @@ class GameState():
 
     def _generateLibMap(self, element, turn, action):
         #visited=np.full(361,-1)
-        newarr=np.array(np.zeros(361), dtype=np.int)
-        del self.processed[:]
         connected = []
+        newarr=np.array(np.zeros(361), dtype=np.int)
         def findLiberty(i,typ,taken,vis, action):
             if i in vis:
                 return 0
@@ -347,7 +349,6 @@ class GameState():
                 else:
                     action = i
                     connected.append(i)
-                    self.processed.append(i)
                     place = (i) % 19
                     isLower = (i >= 342)
                     isUpper = (i <= 18)
@@ -369,14 +370,14 @@ class GameState():
                         return findLiberty(i+1,typ,taken,vis,action)+findLiberty(i-1,typ,taken,vis,action)+findLiberty(i-19,typ,taken,vis,action)
                     else:
                         return findLiberty(i+1,typ,taken,vis,action)+findLiberty(i-1,typ,taken,vis,action)+findLiberty(i+19,typ,taken,vis,action)+findLiberty(i-19,typ,taken,vis,action)
-        def calcliberty(action):
-                taken=[]
-                vis=[]
-                typ = turn
-                place = (action) % 19
-                isLower = (action >= 342)
-                isUpper = (action <= 18)
-                    
+        def calcliberty(action, connected):  
+            taken=[]
+            vis=[]
+            typ = turn
+            place = (action) % 19
+            isLower = (action >= 342)
+            isUpper = (action <= 18)
+            if element[action] == typ:
                 if action == 0:
                     liberty = findLiberty(action+1,typ,taken,vis,action)+findLiberty(action+19,typ,taken,vis,action)
                 elif action==18:
@@ -397,12 +398,147 @@ class GameState():
                     liberty = findLiberty(action+1,typ,taken,vis,action)+findLiberty(action-1,typ,taken,vis,action)+findLiberty(action+19,typ,taken,vis,action)+findLiberty(action-19,typ,taken,vis,action)
                 
                 newarr[connected] = (liberty+1)
+                newarr[action] =  (liberty+1)
+            
+            else:
+                if action == 0:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif action==18:
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+
+                elif action==342:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+
+                elif action==360:
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif place == 0:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif place == 18:
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif isUpper:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                elif isLower:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                else:
+                    liberty = findLiberty(action+1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-1,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action+19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
+                    liberty = findLiberty(action-19,typ,taken,vis,action)
+                    newarr[connected] = (liberty+1)
+                    del connected[:]
+                    del vis[:]
+                    del taken[:]
                 
-                if element[action] == typ:
-                    newarr[action] =  (liberty+1)
-                del connected[:]
-                return newarr  
-        out=calcliberty(action)
+            del connected[:]
+            del vis[:]
+            del taken[:]
+            return newarr  
+        out=calcliberty(action, connected)
         return out
     
     def _checkAllowance(self, action):
@@ -416,7 +552,8 @@ class GameState():
         if any(i > 0 for i in (nextLib - currLib)):
             if tempBoard in self.board_history:
                 return False
-        return True
+            return True
+        return False
             
 
             
@@ -471,7 +608,7 @@ class GameState():
         return id
     
     def _checkForEndGame(self):
-        if(self.board[361]==1 and self.board[362]==-1):
+        if(self.board[361]==1 and self.board[362]==-1) or (self.perv_score[0] > 30):
             return 1
         return 0
     
@@ -529,8 +666,13 @@ class GameState():
     def takeAction(self, action):
         newBoard = np.array(self.board)
         newBoard[action]=self.playerTurn
-        
-        if action != 361 and action != 362:
+        if action == 361:
+            self.game_score[2] = self.perv_score[2] + 1
+            self.game_score[1] = self.perv_score[1]
+        elif action == 362:
+            self.game_score[1] = self.perv_score[1] + 1
+            self.game_score[2] = self.perv_score[2]
+        else:
             newBoard[361] = 0
             newBoard[362] = 0
             LibMap = self._generateLibMap(newBoard[0:361], -self.playerTurn, action)
@@ -538,26 +680,41 @@ class GameState():
             deadCount = sum(deadPieces)
             newBoard[0:361][deadPieces] = 0
             if self.playerTurn == 1:
-                self.game_score+=deadCount
+                self.game_score[1] = self.perv_score[1] + deadCount
+                self.game_score[2] = self.perv_score[2]
             else:
-                self.game_score-=deadCount
-        elif action == 361:
-            self.game_score -= 1
+                self.game_score[1] = self.perv_score[1] 
+                self.game_score[2] = self.perv_score[2] + deadCount
+
+        if self.playerTurn == 1:
+            self.game_score[0] = (self.game_score[1] - self.game_score[2]) 
         else:
-            self.game_score +=1
+            self.game_score[0] = self.game_score[2] - self.game_score[1]
+
+        
             
+        # elif action == 361:
+        #     self.game_score -= 1
+        # else:
+        #     self.game_score +=1
             
         if len(self.board_history) > 3:
             del self.board_history[:]
-            
+        
+        nextStateScore = [0,0,0]
+        nextStateScore[0] = -self.game_score[0]
+        nextStateScore[1] = self.game_score[1]
+        nextStateScore[2] = self.game_score[2]
+
         self.board_history.append(newBoard)
-        newState = GameState(newBoard, -self.playerTurn, self.board_history,  self.game_score)
-        value = 0
+        newState = GameState(newBoard, -self.playerTurn, self.board_history,  nextStateScore)
+        value = self.game_score[0]
         done = 0
         
-        if newState.isEndGame:
-            value = newState.value[0]+self.playerTurn*(self.game_score-config.KOMI)
+        if newState.isEndGame and newState.playerTurn == -1:
+            value = newState.value[0]+self.game_score[0]+self.playerTurn*config.KOMI
             done = 1
+
             
         return (newState, value, done) 
     
@@ -569,11 +726,11 @@ class GameState():
         for r in range(19):
             #logger.info([self.pieces[str(x)] for x in self.board[19*r : (19*r + 19)]])
             print([self.pieces[str(x)]  for x in self.board[19*r : (19*r + 19)]])
-        logger.info('--------------')
-        print(self.value)
+        # logger.info('--------------')
+        print("Prisoners: ", self.perv_score)
         print("Black Pass: ", self.board[361])
         print("White Pass: ", self.board[362])
-        print(self.allowedActions)
+        print("Attention places", self.allowedActions)
         
                 
 
