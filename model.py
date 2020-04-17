@@ -6,24 +6,25 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from keras.models import Sequential, load_model, Model
-from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
-from keras.optimizers import SGD
-from keras import regularizers
-from tensorflow import Graph, Session
-import tensorflow as tf
-import keras
 
-from loss import softmax_cross_entropy_with_logits
-
-import loggers as lg
-
-import keras.backend as K
 
 from settings import run_folder, run_archive_folder
 
 class Gen_Model():
 	def __init__(self, reg_const, learning_rate, input_dim, output_dim):
+		from keras.models import Sequential, load_model, Model
+		from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
+		from keras.optimizers import SGD
+		from keras import regularizers
+		from tensorflow import Graph, Session
+		import tensorflow as tf
+		import keras
+
+		from loss import softmax_cross_entropy_with_logits
+
+		import loggers as lg
+
+		import keras.backend as K
 		self.reg_const = reg_const
 		self.learning_rate = learning_rate
 		self.input_dim = input_dim
@@ -115,12 +116,46 @@ class Gen_Model():
 
 class Residual_CNN(Gen_Model):
 	def __init__(self, reg_const, learning_rate, input_dim,  output_dim, hidden_layers):
+		import logging
+		import config
+		import numpy as np
+
+		import matplotlib.pyplot as plt
+
+		from keras.models import Sequential, load_model, Model
+		from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
+		from keras.optimizers import SGD
+		from keras import regularizers
+		from tensorflow import Graph, Session
+		import tensorflow as tf
+		import keras
+
+		from loss import softmax_cross_entropy_with_logits
+
+		import loggers as lg
+
+		import keras.backend as K
+
+		from settings import run_folder, run_archive_folder
 		Gen_Model.__init__(self, reg_const, learning_rate, input_dim, output_dim)
 		self.hidden_layers = hidden_layers
 		self.num_layers = len(hidden_layers)
 		self.model, self.graph, self.session = self._build_model()
 
 	def residual_layer(self, input_block, filters, kernel_size):
+		from keras.models import Sequential, load_model, Model
+		from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
+		from keras.optimizers import SGD
+		from keras import regularizers
+		from tensorflow import Graph, Session
+		import tensorflow as tf
+		import keras
+
+		from loss import softmax_cross_entropy_with_logits
+
+		import loggers as lg
+
+		import keras.backend as K
 
 		x = self.conv_layer(input_block, filters, kernel_size)
 
@@ -143,7 +178,19 @@ class Residual_CNN(Gen_Model):
 		return (x)
 
 	def conv_layer(self, x, filters, kernel_size):
+		from keras.models import Sequential, load_model, Model
+		from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
+		from keras.optimizers import SGD
+		from keras import regularizers
+		from tensorflow import Graph, Session
+		import tensorflow as tf
+		import keras
 
+		from loss import softmax_cross_entropy_with_logits
+
+		import loggers as lg
+
+		import keras.backend as K
 		x = Conv2D(
 		filters = filters
 		, kernel_size = kernel_size
@@ -160,6 +207,19 @@ class Residual_CNN(Gen_Model):
 		return (x)
 
 	def value_head(self, x):
+		from keras.models import Sequential, load_model, Model
+		from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
+		from keras.optimizers import SGD
+		from keras import regularizers
+		from tensorflow import Graph, Session
+		import tensorflow as tf
+		import keras
+
+		from loss import softmax_cross_entropy_with_logits
+
+		import loggers as lg
+
+		import keras.backend as K
 
 		x = Conv2D(
 		filters = 1
@@ -199,6 +259,19 @@ class Residual_CNN(Gen_Model):
 		return (x)
 
 	def policy_head(self, x):
+		from keras.models import Sequential, load_model, Model
+		from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
+		from keras.optimizers import SGD
+		from keras import regularizers
+		from tensorflow import Graph, Session
+		import tensorflow as tf
+		import keras
+
+		from loss import softmax_cross_entropy_with_logits
+
+		import loggers as lg
+
+		import keras.backend as K
 
 		x = Conv2D(
 		filters = 2
@@ -226,10 +299,24 @@ class Residual_CNN(Gen_Model):
 		return (x)
 
 	def _build_model(self):
+		from keras.models import Sequential, load_model, Model
+		from keras.layers import Input, Dense, Conv2D, Flatten, BatchNormalization, Activation, LeakyReLU, add
+		from keras.optimizers import SGD
+		from keras import regularizers
+		from tensorflow import Graph, Session
+		import tensorflow as tf
+		import keras
+
+		from loss import softmax_cross_entropy_with_logits
+
+		import loggers as lg
+
+		import keras.backend as K
 		thread_graph = Graph()
 		with thread_graph.as_default():
 			thread_session = Session()
 			with thread_session.as_default():
+				K.set_session(thread_session)
 				main_input = Input(shape = self.input_dim, name = 'main_input')
 				x = self.conv_layer(main_input, self.hidden_layers[0]['filters'], self.hidden_layers[0]['kernel_size'])
 				if len(self.hidden_layers) > 1:

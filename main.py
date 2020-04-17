@@ -9,8 +9,6 @@ import random
 from importlib import reload
 
 
-from keras.utils import plot_model
-
 from game import Game, GameState
 from agent import Agent
 from memory import Memory

@@ -1,8 +1,8 @@
 # %matplotlib inline
-
 import numpy as np
 import random
 import threading
+import multiprocessing
 import MCTS as mc
 from game import GameState
 from loss import softmax_cross_entropy_with_logits
@@ -36,15 +36,15 @@ class User():
 class Agent():
 	def __init__(self, name, state_size, action_size, mcts_simulations, cpuct, model, env):
 		self.name = name
-		self.threads_n = 5
+		self.processes_n = 5
 		self.state_size = state_size
 		self.action_size = action_size
 
 		self.cpuct = cpuct
 		self.MCTSsimulations = mcts_simulations
 		self.models = [model, None, None, None, None, None]
-		self.threads_trees = [None, None, None, None, None, None]
-		self.mcts = self.threads_trees[0]
+		self.processes_trees = [None, None, None, None, None, None]
+		self.mcts = self.processes_trees[0]
 		self.train_overall_loss = []
 		self.train_value_loss = []
 		self.train_policy_loss = []
@@ -54,52 +54,53 @@ class Agent():
 		self.env = env
 
 	
-	def simulate(self, thread_id, state):
-
-		sim_n = int(self.MCTSsimulations/5)
-		self.models[thread_id] = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, (2,) + self.env.grid_shape,   self.env.action_size, config.HIDDEN_CNN_LAYERS)
-		if self.threads_trees[thread_id] == None or state.id not in self.threads_trees[thread_id].tree:
-			self.buildMCTS(state, thread_id)
+	def simulate(self, process_id, state):
+		sim_n = int(self.MCTSsimulations/self.processes_n)
+		self.models[process_id] = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, (2,) + self.env.grid_shape,   self.env.action_size, config.HIDDEN_CNN_LAYERS)
+		if self.processes_trees[process_id] == None or state.id not in self.processes_trees[process_id].tree:
+			self.buildMCTS(state, process_id)
 		else:
-			self.changeRootMCTS(state, thread_id) 
-		for i in range(sim_n):
+			self.changeRootMCTS(state, process_id) 
+		for _ in range(sim_n):
 			##### MOVE THE LEAF NODE
-			leaf, value, done, breadcrumbs = self.threads_trees[thread_id].moveToLeaf()
+			
+			leaf, value, done, breadcrumbs = self.processes_trees[process_id].moveToLeaf()
 			#leaf.state.render(lg.logger_mcts)
-
+			
 			##### EVALUATE THE LEAF NODE
-			value, breadcrumbs = self.evaluateLeaf(leaf, value, done, breadcrumbs, thread_id)
+			value, breadcrumbs = self.evaluateLeaf(leaf, value, done, breadcrumbs, process_id)
+			
 
 			##### BACKFILL THE VALUE THROUGH THE TREE
-			self.threads_trees[thread_id].backFill(leaf, value, breadcrumbs)
+			self.processes_trees[process_id].backFill(leaf, value, breadcrumbs)
 
 
 	def act(self, state, tau):
 		
-		if self.threads_trees[0] == None or state.id not in self.threads_trees[0].tree:
+		if self.processes_trees[0] == None or state.id not in self.processes_trees[0].tree:
 			self.buildMCTS(state, 0)
 		else:
 			self.changeRootMCTS(state, 0)
-		
-
+	
 		#### run the simulation
-		threads = []
-		for sim in range(self.threads_n):
+		processes = []
+		for sim in range(self.processes_n):
 			# lg.logger_mcts.info('***************************')
 			# lg.logger_mcts.info('****** SIMULATION %d ******', sim + 1)
 			# lg.logger_mcts.info('***************************')
 			
-			threads.append(threading.Thread(target=self.simulate, args=(sim+1, state, )))
-			threads[sim].start()
+			processes.append(multiprocessing.Process(target=self.simulate, args=(sim+1, state, )))
+			processes[sim].start()
 
-		for sim in range(self.threads_n):
-			threads[sim].join()
+		for sim in range(self.processes_n):
+			print("here", sim)
+			processes[sim+1].join()
 
-		self.mcts = self.threads_trees[1]
+		self.mcts = self.processes_trees[1]
 		
-		for sim in range(self.threads_n):
-			self.mcts.tree.update(self.threads_trees[sim+1].tree)
-			self.threads_trees[sim+1].tree.clear()
+		for sim in range(self.processes_n):
+			self.mcts.tree.update(self.processes_trees[sim+1].tree)
+			self.processes_trees[sim+1].tree.clear()
 
 		#### get action values
 		pi, values = self.getAV(1)
@@ -118,11 +119,11 @@ class Agent():
 		return (action, pi, value, NN_value)
 
 
-	def get_preds(self, state, thread_id):
+	def get_preds(self, state, process_id):
 		#predict the leaf
-		inputToModel = np.array([self.models[thread_id].convertToModelInput(state)])
-
-		preds = self.models[thread_id].predict(inputToModel)
+		inputToModel = np.array([self.models[process_id].convertToModelInput(state)])
+		preds = self.models[process_id].predict(inputToModel)
+		
 		value_array = preds[0]
 		logits_array = preds[1]
 		value = value_array[0]
@@ -130,6 +131,7 @@ class Agent():
 		logits = logits_array[0]
 
 		allowedActions = state.allowedActions
+		
 
 		mask = np.ones(logits.shape,dtype=bool)
 		mask[allowedActions] = False
@@ -142,25 +144,25 @@ class Agent():
 		return ((value, probs, allowedActions))
 
 
-	def evaluateLeaf(self, leaf, value, done, breadcrumbs, thread_id):
+	def evaluateLeaf(self, leaf, value, done, breadcrumbs, process_id):
 
 		# lg.logger_mcts.info('------EVALUATING LEAF------')
 
 		if done == 0:
 	
-			value, probs, allowedActions = self.get_preds(leaf.state, thread_id)
+			value, probs, allowedActions = self.get_preds(leaf.state, process_id)
 			# lg.logger_mcts.info('PREDICTED VALUE FOR %d: %f', leaf.state.playerTurn, value)
-
+			
 			probs = probs[allowedActions]
 
 			for idx, action in enumerate(allowedActions):
 				newState, _, _ = leaf.state.takeAction(action)
-				if newState.id not in self.threads_trees[thread_id].tree:
+				if newState.id not in self.processes_trees[process_id].tree:
 					node = mc.Node(newState)
-					self.threads_trees[thread_id].addNode(node)
+					self.processes_trees[process_id].addNode(node)
 					# lg.logger_mcts.info('added node...%s...p = %f', node.id, probs[idx])
 				else:
-					node = self.threads_trees[thread_id].tree[newState.id]
+					node = self.processes_trees[process_id].tree[newState.id]
 					# lg.logger_mcts.info('existing node...%s...', node.id)
 
 				newEdge = mc.Edge(leaf, node, probs[idx], action)
@@ -231,15 +233,15 @@ class Agent():
 		print('\n')
 		self.models[0].printWeightAverages()
 
-	def predict(self, inputToModel, thread_id):
-		preds = self.models[thread_id].predict(inputToModel)
+	def predict(self, inputToModel, process_id):
+		preds = self.models[process_id].predict(inputToModel)
 		return preds
 
-	def buildMCTS(self, state, thread_id):
+	def buildMCTS(self, state, process_id):
 		# lg.logger_mcts.info('****** BUILDING NEW MCTS TREE FOR AGENT %s ******', self.name)
 		root = mc.Node(state)
-		self.threads_trees[thread_id] = mc.MCTS(root, self.cpuct)
+		self.processes_trees[process_id] = mc.MCTS(root, self.cpuct)
 
-	def changeRootMCTS(self, state, thread_id):
+	def changeRootMCTS(self, state, process_id):
 		# lg.logger_mcts.info('****** CHANGING ROOT OF MCTS TREE TO %s FOR AGENT %s ******', state.id, self.name)
-		self.threads_trees[thread_id].root = self.threads_trees[thread_id].tree[state.id]
+		self.processes_trees[process_id].root = self.processes_trees[process_id].tree[state.id]
