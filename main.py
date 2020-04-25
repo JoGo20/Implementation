@@ -124,7 +124,7 @@ while 1:
             # lg.logger_memory.info('ID: %s', s['state'].id)
             # lg.logger_memory.info('INPUT TO MODEL: %s', current_player.model.convertToModelInput(s['state']))
 
-            s['state'].render(lg.logger_memory)
+            #s['state'].render(lg.logger_memory)
             
         ######## TOURNAMENT ########
         print('TOURNAMENT...')

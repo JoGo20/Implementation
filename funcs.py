@@ -150,10 +150,11 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             estimated_board_score = (current_player_score,current_player_score,other_player_score)
             print("Estimated board score: ", estimated_board_score)
 
-            if done == 1 or estimated_board_score[0] > 50:
+            if done == 1 or estimated_board_score[0] > 100:
                 print("Done")
-                if estimated_board_score[0] > 50:
+                if estimated_board_score[0] > 100:
                     print("Player playing with ", state.pieces[str(state.playerTurn)], " won by resignation")
+                    value += estimated_board_score[0]
                     done =1
                 if memory != None:
                     #### If the game is finished, assign the values correctly to the game moves
