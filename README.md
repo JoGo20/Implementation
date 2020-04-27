@@ -1,3 +1,4 @@
+Go Game implementation based on Deepmind's AlphGozero!
 # Game Rules
  <br />
 The game is time-limited up to 30 minutes where each player’s timer starts with 15
