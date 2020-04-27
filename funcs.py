@@ -4,7 +4,7 @@ import time
 import loggers as lg
 
 from game import Game, GameState
-from model import Residual_CNN
+#from model import Residual_CNN
 
 from agent import Agent, User
 
@@ -29,31 +29,31 @@ _estimator_so = ctypes.cdll.LoadLibrary('./score_estimator.so')
 
 
 
-def playMatchesBetweenVersions(env, run_version, player1version, player2version, EPISODES, logger, turns_until_tau0, goes_first = 0):
+# def playMatchesBetweenVersions(env, run_version, player1version, player2version, EPISODES, logger, turns_until_tau0, goes_first = 0):
     
-    if player1version == -1:
-        player1 = User('player1', env.state_size, env.action_size)
-    else:
-        player1_NN = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, env.input_shape,   env.action_size, config.HIDDEN_CNN_LAYERS)
+#     if player1version == -1:
+#         player1 = User('player1', env.state_size, env.action_size)
+#     else:
+#         player1_NN = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, env.input_shape,   env.action_size, config.HIDDEN_CNN_LAYERS)
 
-        if player1version > 0:
-            player1_network = player1_NN.read(env.name, run_version, player1version)
-            player1_NN.model.set_weights(player1_network.get_weights())   
-        player1 = Agent('player1', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, player1_NN)
+#         if player1version > 0:
+#             player1_network = player1_NN.read(env.name, run_version, player1version)
+#             player1_NN.model.set_weights(player1_network.get_weights())   
+#         player1 = Agent('player1', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, player1_NN)
 
-    if player2version == -1:
-        player2 = User('player2', env.state_size, env.action_size)
-    else:
-        player2_NN = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, env.input_shape,   env.action_size, config.HIDDEN_CNN_LAYERS)
+#     if player2version == -1:
+#         player2 = User('player2', env.state_size, env.action_size)
+#     else:
+#         player2_NN = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, env.input_shape,   env.action_size, config.HIDDEN_CNN_LAYERS)
         
-        if player2version > 0:
-            player2_network = player2_NN.read(env.name, run_version, player2version)
-            player2_NN.model.set_weights(player2_network.get_weights())
-        player2 = Agent('player2', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, player2_NN)
+#         if player2version > 0:
+#             player2_network = player2_NN.read(env.name, run_version, player2version)
+#             player2_NN.model.set_weights(player2_network.get_weights())
+#         player2 = Agent('player2', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT, player2_NN)
 
-    scores, memory, points, sp_scores = playMatches(player1, player2, EPISODES, logger, turns_until_tau0, None, goes_first)
+#     scores, memory, points, sp_scores = playMatches(player1, player2, EPISODES, logger, turns_until_tau0, None, goes_first)
 
-    return (scores, memory, points, sp_scores)
+#     return (scores, memory, points, sp_scores)
 
 
 def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = None, goes_first = 0):
@@ -138,33 +138,36 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             
             env.gameState.render(logger) #Send state to GUI lib
 
-            state.arr = ((19 * 19) * ctypes.c_int)()
-            data = np.copy(state.board[0:361])
-            estimated_board_score = 0
-            for i, v in enumerate(data):
-                state.arr[i] = v
-            score = _estimator_so.estimate(19, 19, state.arr, state.playerTurn, 1000,ctypes.c_float(0.4))
-            data[:] = state.arr
-            current_player_score = state.playerTurn*score
-            other_player_score = -state.playerTurn*score
-            estimated_board_score = (current_player_score,current_player_score,other_player_score)
-            print("Estimated board score: ", estimated_board_score)
+            # state.arr = ((19 * 19) * ctypes.c_int)()
+            # data = np.copy(state.board[0:361])
+            # estimated_board_score = 0
+            # for i, v in enumerate(data):
+            #     state.arr[i] = v
+            # score = _estimator_so.estimate(19, 19, state.arr, state.playerTurn, 1000,ctypes.c_float(0.4))
+            # data[:] = state.arr
+            # current_player_score = state.playerTurn*score
+            # other_player_score = -state.playerTurn*score
+            # estimated_board_score = (current_player_score,current_player_score,other_player_score)
+            # print("Estimated board score: ", estimated_board_score)
+            # if(turn>22):
+            #     done = 1
+            #     value = estimated_board_score[0]
 
-            if done == 1 or estimated_board_score[0] > 100:
+            if done == 1: #or estimated_board_score[0] > 100:
                 print("Done")
-                if estimated_board_score[0] > 100:
-                    print("Player playing with ", state.pieces[str(state.playerTurn)], " won by resignation")
-                    value += estimated_board_score[0]
-                    done =1
-                if memory != None:
-                    #### If the game is finished, assign the values correctly to the game moves
-                    for move in memory.stmemory:
-                        if move['playerTurn'] == state.playerTurn:
-                            move['value'] = value
-                        else:
-                            move['value'] = -value
+                # if estimated_board_score[0] > 100:
+                #     print("Player playing with ", state.pieces[str(state.playerTurn)], " won by resignation")
+                #     value += estimated_board_score[0]
+                #     done =1
+                # if memory != None:
+                #     #### If the game is finished, assign the values correctly to the game moves
+                #     for move in memory.stmemory:
+                #         if move['playerTurn'] == state.playerTurn:
+                #             move['value'] = value
+                #         else:
+                #             move['value'] = -value
                          
-                    memory.commit_ltmemory()
+                #     memory.commit_ltmemory()
              
                 if value > 0:
                     print('%s WINS!', players[state.playerTurn]['name'])

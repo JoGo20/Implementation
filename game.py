@@ -83,24 +83,24 @@ class Game:
         currentBoard = state.board
         currentAV = actionValues
 
-        # The structure of the board state in memory
-        cb = []
-        for i in range(19):
-           for j in range(18, -1, -1):
-              cb.append(currentBoard[i+j])
-        cb.append(currentBoard[362])
-        cb.append(currentBoard[361])
-        currentBoard = np.array(cb)
-        # The structure of the action values in memory
+        # # The structure of the board state in memory
+        # cb = []
+        # for i in range(19):
+        #    for j in range(18, -1, -1):
+        #       cb.append(currentBoard[i+j])
+        # cb.append(currentBoard[362])
+        # cb.append(currentBoard[361])
+        # currentBoard = np.array(cb)
+        # # The structure of the action values in memory
         
-        av = []
-        for i in range(19):
-            for j in range(18, -1, -1):
-                av.append(currentAV[i+j])
+        # av = []
+        # for i in range(19):
+        #     for j in range(18, -1, -1):
+        #         av.append(currentAV[i+j])
                 
-        av.append(currentAV[362])
-        av.append(currentAV[361])
-        currentAV = np.array(av)
+        # av.append(currentAV[362])
+        # av.append(currentAV[361])
+        # currentAV = np.array(av)
         
         identities.append((GameState(currentBoard, state.playerTurn, self.board_history,  self.game_score), currentAV))
         
@@ -123,21 +123,22 @@ class GameState():
         self.game_score = [0,0,0]
         self.perv_score = game_score
         self.isEndGame = self._checkForEndGame()
+        self.value = (0,0,0)
 
 
  
-        if(self.isEndGame and self.playerTurn == -1):
-            self.arr = ((19 * 19) * ctypes.c_int)()
-            data = np.copy(self.board[0:361])
-            for i, v in enumerate(data):
-                self.arr[i] = v
-            score = _estimator_so.estimate(19, 19, self.arr, self.playerTurn, 1000,ctypes.c_float(0.4))
-            data[:] = self.arr
-            current_player_score = self.playerTurn*score + self.perv_score[0]
-            other_player_score = -self.playerTurn*score - self.perv_score[0]
-            self.value = (current_player_score,current_player_score,other_player_score)
-        else:
-            self.value = self.perv_score
+        # if(self.isEndGame and self.playerTurn == -1):
+        #     self.arr = ((19 * 19) * ctypes.c_int)()
+        #     data = np.copy(self.board[0:361])
+        #     for i, v in enumerate(data):
+        #         self.arr[i] = v
+        #     score = _estimator_so.estimate(19, 19, self.arr, self.playerTurn, 1000,ctypes.c_float(0.4))
+        #     data[:] = self.arr
+        #     current_player_score = self.playerTurn*score + self.perv_score[0]
+        #     other_player_score = -self.playerTurn*score - self.perv_score[0]
+        #     self.value = (current_player_score,current_player_score,other_player_score)
+        # else:
+        #     self.value = self.perv_score
         self.score = self._getScore()
         #self.estimate.__annotations__ = { 'width': int, 'height': int, 'data': List[int], 'player_to_move': int, 'trials': int, 'tolerance': float, 'return': int,} 
     

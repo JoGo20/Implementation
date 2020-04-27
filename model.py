@@ -14,8 +14,13 @@ from keras import regularizers
 from loss import softmax_cross_entropy_with_logits
 
 import loggers as lg
-
+import tensorflow as tf
 import keras.backend as K
+K.tensorflow_backend._get_available_gpus()
+#K.set_session(tf.compat.v1.Session)
+print("Session has been set")
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
 from settings import run_folder, run_archive_folder
 
@@ -35,7 +40,7 @@ class Gen_Model():
 	def write(self, game, version):
 		self.model.save(run_folder + 'models/version' + "{0:0>4}".format(version) + '.h5')
 
-	def read(self, game, run_number, version):
+	def read(self, run_number, version):
 		return load_model('run/models/version0001.h5', custom_objects={'softmax_cross_entropy_with_logits': softmax_cross_entropy_with_logits})
 #run_archive_folder + game + '/run' + str(run_number).zfill(4) + "/models/version" + "{0:0>4}".format(version) + '.h5'
 	def printWeightAverages(self):

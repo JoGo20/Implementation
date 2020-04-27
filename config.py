@@ -1,19 +1,19 @@
 #### SELF PLAY
 EPISODES = 1
-MCTS_SIMS = 3
-MEMORY_SIZE = 300
-TURNS_UNTIL_TAU0 = 80 # turn on which it starts playing deterministically
-CPUCT = 1
-EPSILON = 0.5
-ALPHA = 0.5
+MCTS_SIMS = 500
+MEMORY_SIZE = 4000
+TURNS_UNTIL_TAU0 = 400 # turn on which it starts playing deterministically
+CPUCT = 4
+EPSILON = 0.75
+ALPHA = 0.03
 KOMI = 6.5
 
 
 #### RETRAINING
 BATCH_SIZE = 256
-EPOCHS = 1
+EPOCHS = 10
 REG_CONST = 0.0001
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.0001
 MOMENTUM = 0.9
 TRAINING_LOOPS = 10
 

@@ -1,7 +1,7 @@
 import numpy as np
 import logging
 import config
-
+CPU_COUNT = 8
 from utils import setup_logger
 import loggers as lg
 
@@ -47,7 +47,7 @@ class MCTS():
 	def __len__(self):
 		return len(self.tree)
 
-	def moveToLeaf(self):
+	def moveToLeaf(self, p):
 
 		# lg.logger_mcts.info('------MOVING TO LEAF------')
 
@@ -73,8 +73,11 @@ class MCTS():
 			Nb = 0
 			for action, edge in currentNode.edges:
 				Nb = Nb + edge.stats['N']
-
-			for idx, (action, edge) in enumerate(currentNode.edges):
+			
+			actions_start = int(p*len(currentNode.edges)/CPU_COUNT)
+			actions_end = int((1+p)*len(currentNode.edges)/CPU_COUNT)
+			#print("len(currentNode.edges): ", len(currentNode.edges[actions_start:actions_end]))
+			for idx, (action, edge) in enumerate(currentNode.edges[actions_start:actions_end]):
 
 				U = self.cpuct * \
 					((1-epsilon) * edge.stats['P'] + epsilon * nu[idx] )  * \
@@ -92,7 +95,7 @@ class MCTS():
 					simulationEdge = edge
 
 			# lg.logger_mcts.info('action with highest Q + U...%d', simulationAction)
-
+			#print("Process: ",p," Action: ", simulationAction)
 			newState, value, done = currentNode.state.takeAction(simulationAction) #the value of the newState from the POV of the new playerTurn
 			currentNode = simulationEdge.outNode
 			breadcrumbs.append(simulationEdge)
