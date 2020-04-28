@@ -19,8 +19,8 @@ import keras.backend as K
 K.tensorflow_backend._get_available_gpus()
 #K.set_session(tf.compat.v1.Session)
 print("Session has been set")
-from tensorflow.python.client import device_lib
-print(device_lib.list_local_devices())
+#from tensorflow.python.client import device_lib
+#print(device_lib.list_local_devices())
 
 from settings import run_folder, run_archive_folder
 

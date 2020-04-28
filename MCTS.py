@@ -53,7 +53,10 @@ class MCTS():
 
 		breadcrumbs = []
 		currentNode = self.root
-
+		actions_start = int(p*len(currentNode.edges)/CPU_COUNT)
+		actions_end = int((1+p)*len(currentNode.edges)/CPU_COUNT)+1
+		#print("Process: ", p, " Start = ", actions_start, " End = ", actions_end)
+		currentNode.edges = currentNode.edges[actions_start:actions_end]
 		done = 0
 		value = 0
 
@@ -73,11 +76,10 @@ class MCTS():
 			Nb = 0
 			for action, edge in currentNode.edges:
 				Nb = Nb + edge.stats['N']
-			
-			actions_start = int(p*len(currentNode.edges)/CPU_COUNT)
-			actions_end = int((1+p)*len(currentNode.edges)/CPU_COUNT)
-			#print("len(currentNode.edges): ", len(currentNode.edges[actions_start:actions_end]))
-			for idx, (action, edge) in enumerate(currentNode.edges[actions_start:actions_end]):
+			# if p == 7:
+			# 	print("Process: ", p," len(currentNode.edges): ", len(currentNode.edges))
+		
+			for idx, (action, edge) in enumerate(currentNode.edges):
 
 				U = self.cpuct * \
 					((1-epsilon) * edge.stats['P'] + epsilon * nu[idx] )  * \
@@ -95,10 +97,12 @@ class MCTS():
 					simulationEdge = edge
 
 			# lg.logger_mcts.info('action with highest Q + U...%d', simulationAction)
-			#print("Process: ",p," Action: ", simulationAction)
+			# if p == 7:
+			# 	print("Process: ",p," Action: ", simulationAction)
 			newState, value, done = currentNode.state.takeAction(simulationAction) #the value of the newState from the POV of the new playerTurn
 			currentNode = simulationEdge.outNode
 			breadcrumbs.append(simulationEdge)
+			
 
 		# lg.logger_mcts.info('DONE...%d', done)
 

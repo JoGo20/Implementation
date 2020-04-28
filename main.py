@@ -91,11 +91,11 @@ while 1:
         # lg.logger_memory.info('NEW MEMORIES')
         # lg.logger_memory.info('====================')
         
-        memory_samp = random.sample(memory.ltmemory, min(1000, len(memory.ltmemory)))
+        # memory_samp = random.sample(memory.ltmemory, min(1000, len(memory.ltmemory)))
         
-        for s in memory_samp:
-            current_value, current_probs, _ = current_player.get_preds(s['state'])
-            best_value, best_probs, _ = best_player.get_preds(s['state'])
+        # for s in memory_samp:
+        #     current_value, current_probs, _ = current_player.get_preds(s['state'])
+        #     best_value, best_probs, _ = best_player.get_preds(s['state'])
 
             # lg.logger_memory.info('MCTS VALUE FOR %s: %f', s['playerTurn'], s['value'])
             # lg.logger_memory.info('CUR PRED VALUE FOR %s: %f', s['playerTurn'], current_value)

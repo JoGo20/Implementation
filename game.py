@@ -123,22 +123,21 @@ class GameState():
         self.game_score = [0,0,0]
         self.perv_score = game_score
         self.isEndGame = self._checkForEndGame()
-        self.value = (0,0,0)
 
 
  
-        # if(self.isEndGame and self.playerTurn == -1):
-        #     self.arr = ((19 * 19) * ctypes.c_int)()
-        #     data = np.copy(self.board[0:361])
-        #     for i, v in enumerate(data):
-        #         self.arr[i] = v
-        #     score = _estimator_so.estimate(19, 19, self.arr, self.playerTurn, 1000,ctypes.c_float(0.4))
-        #     data[:] = self.arr
-        #     current_player_score = self.playerTurn*score + self.perv_score[0]
-        #     other_player_score = -self.playerTurn*score - self.perv_score[0]
-        #     self.value = (current_player_score,current_player_score,other_player_score)
-        # else:
-        #     self.value = self.perv_score
+        if(self.isEndGame and self.playerTurn == -1):
+            arr = ((19 * 19) * ctypes.c_int)()
+            data = np.copy(self.board[0:361])
+            for i, v in enumerate(data):
+                arr[i] = v
+            score = _estimator_so.estimate(19, 19, arr, self.playerTurn, 1000,ctypes.c_float(0.4))
+            data[:] = arr
+            current_player_score = self.playerTurn*score + self.perv_score[0]
+            other_player_score = -self.playerTurn*score - self.perv_score[0]
+            self.value = (current_player_score,current_player_score,other_player_score)
+        else:
+            self.value = self.perv_score
         self.score = self._getScore()
         #self.estimate.__annotations__ = { 'width': int, 'height': int, 'data': List[int], 'player_to_move': int, 'trials': int, 'tolerance': float, 'return': int,} 
     
@@ -712,7 +711,7 @@ class GameState():
         value = self.game_score[0]
         done = 0
         
-        if newState.isEndGame and newState.playerTurn == -1:
+        if newState.isEndGame:
             value = newState.value[0]+self.game_score[0]+self.playerTurn*config.KOMI
             done = 1
 

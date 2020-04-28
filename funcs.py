@@ -124,7 +124,7 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
                 memory.commit_stmemory(env.identities, state, pi)
 
                 #players[state.playerTurn]['agent'].mcts._delGarbageNodes(players[state.playerTurn]['agent'].mcts.root,action)
-                players[state.playerTurn]['agent'].mcts.tree.clear()
+                #players[state.playerTurn]['agent'].mcts.tree.clear()
             perv_turn = time.time()
             # logger.info('action: %d', action)
             # for r in range(env.grid_shape[0]):
@@ -138,36 +138,36 @@ def playMatches(player1, player2, EPISODES, logger, turns_until_tau0, memory = N
             
             env.gameState.render(logger) #Send state to GUI lib
 
-            # state.arr = ((19 * 19) * ctypes.c_int)()
-            # data = np.copy(state.board[0:361])
-            # estimated_board_score = 0
-            # for i, v in enumerate(data):
-            #     state.arr[i] = v
-            # score = _estimator_so.estimate(19, 19, state.arr, state.playerTurn, 1000,ctypes.c_float(0.4))
-            # data[:] = state.arr
-            # current_player_score = state.playerTurn*score
-            # other_player_score = -state.playerTurn*score
-            # estimated_board_score = (current_player_score,current_player_score,other_player_score)
-            # print("Estimated board score: ", estimated_board_score)
-            # if(turn>22):
-            #     done = 1
-            #     value = estimated_board_score[0]
+            arr = ((19 * 19) * ctypes.c_int)()
+            data = np.copy(state.board[0:361])
+            estimated_board_score = 0
+            for i, v in enumerate(data):
+                arr[i] = v
+            score = _estimator_so.estimate(19, 19, arr, state.playerTurn, 1000,ctypes.c_float(0.4))
+            data[:] = arr
+            current_player_score = state.playerTurn*score
+            other_player_score = -state.playerTurn*score
+            estimated_board_score = (current_player_score,current_player_score,other_player_score)
+            print("Estimated board score: ", estimated_board_score)
+            if(turn>22):
+                done = 1
+                value = estimated_board_score[0]
 
-            if done == 1: #or estimated_board_score[0] > 100:
+            if done == 1 or estimated_board_score[0] > 100:
                 print("Done")
-                # if estimated_board_score[0] > 100:
-                #     print("Player playing with ", state.pieces[str(state.playerTurn)], " won by resignation")
-                #     value += estimated_board_score[0]
-                #     done =1
-                # if memory != None:
-                #     #### If the game is finished, assign the values correctly to the game moves
-                #     for move in memory.stmemory:
-                #         if move['playerTurn'] == state.playerTurn:
-                #             move['value'] = value
-                #         else:
-                #             move['value'] = -value
+                if estimated_board_score[0] > 100:
+                    print("Player playing with ", state.pieces[str(state.playerTurn)], " won by resignation")
+                    value += estimated_board_score[0]
+                    done =1
+                if memory != None:
+                    #### If the game is finished, assign the values correctly to the game moves
+                    for move in memory.stmemory:
+                        if move['playerTurn'] == state.playerTurn:
+                            move['value'] = value
+                        else:
+                            move['value'] = -value
                          
-                #     memory.commit_ltmemory()
+                    memory.commit_ltmemory()
              
                 if value > 0:
                     print('%s WINS!', players[state.playerTurn]['name'])

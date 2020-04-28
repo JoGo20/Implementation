@@ -17,7 +17,7 @@ import random
 import MCTS as mc
 from game import GameState
 from loss import softmax_cross_entropy_with_logits
-
+import memory_profiler
 import config
 import loggers as lg
 import time
@@ -79,13 +79,13 @@ class Agent():
 		if initialise.INITIAL_MODEL_VERSION != None:
 			m_tmp = resmodel.read(initialise.INITIAL_RUN_NUMBER, initialise.INITIAL_MODEL_VERSION)
 			resmodel.model.set_weights(m_tmp.get_weights())
-		print("Model summary:")
-		resmodel.model.summary()
+		#print("Model summary:")
+		#resmodel.model.summary()
 		return resmodel.model.get_weights() # returns a list of all weight tensors in the model, as Numpy arrays
 
 
 
-
+	
 	def simulate(self, state, p):
 
 		root = mc.Node(state)
@@ -93,12 +93,13 @@ class Agent():
 		if self.mcts == None or state.id not in self.mcts.tree:
 			pass
 		else:
-			mcts.tree.update(self.mcts.tree.copy())
+			mcts.tree.update(self.mcts.tree)
 			mcts.root = mcts.tree[state.id]
 	
 		import model
 		from model import Residual_CNN
 		resmodel = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, (2,) + (19, 19),   363, config.HIDDEN_CNN_LAYERS)
+		resmodel.model.set_weights(self.weights)
 		##### MOVE THE LEAF NODE
 		sim_n = int(self.MCTSsimulations/CPU_COUNT)
 		
@@ -118,7 +119,6 @@ class Agent():
 			#queue.task_done()
 			#queue.join()
 			
-		
 		return mcts
 		
 
@@ -130,8 +130,6 @@ class Agent():
 		resmodel = Residual_CNN(config.REG_CONST, config.LEARNING_RATE, (2,) + (19, 19),   363, config.HIDDEN_CNN_LAYERS)
 		resmodel.model.set_weights(self.weights)
 		resmodel.write(game, version)
-
-
 
 	def act(self, state, tau):
 		if self.mcts == None or state.id not in self.mcts.tree:
@@ -148,6 +146,7 @@ class Agent():
 			print("Evaluation time = ", (end-start))
 			self.mcts.tree.update(umcts.tree)
 			self.mcts.root = umcts.root
+			umcts.tree.clear()
 		#### get action values
 		pi, values = self.getAV(1)
 
@@ -161,7 +160,7 @@ class Agent():
 		# lg.logger_mcts.info('CHOSEN ACTION...%d', action)
 		# lg.logger_mcts.info('MCTS PERCEIVED VALUE...%f', value)
 		# lg.logger_mcts.info('NN PERCEIVED VALUE...%f', NN_value)
-		
+		print("Action selected: ", action)
 		return (action, pi, value, NN_value)
 
 
@@ -205,8 +204,8 @@ class Agent():
 			value, probs, allowedActions = self.get_preds(leaf.state, resmodel)
 			# lg.logger_mcts.info('PREDICTED VALUE FOR %d: %f', leaf.state.playerTurn, value)
 			probs = probs[allowedActions]
-			# actions_start = int(p*len(allowedActions)/CPU_COUNT)
-			# actions_end = int((1+p)*len(allowedActions)/CPU_COUNT)
+			actions_start = int(p*len(allowedActions)/CPU_COUNT)
+			actions_end = int((1+p)*len(allowedActions)/CPU_COUNT)+1
 			for idx, action in enumerate(allowedActions):
 				newState, _, _ = leaf.state.takeAction(action)
 				if newState.id not in mcts.tree:
