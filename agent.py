@@ -2,21 +2,29 @@
 
 import numpy as np
 import random
-
 import MCTS as mc
 from game import GameState
-from loss import softmax_cross_entropy_with_logits
-
 import config
 import loggers as lg
 import time
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 from IPython import display
 import pylab as pl
-
+import numpy as np
+import os
+import random
+import re
+import sys
+import go
+from policy import PolicyNetwork
+from strategies import MCTSPlayerMixin
+read_file = "saved_models/20170718"
+WHITE, EMPTY, BLACK, FILL, KO, UNKNOWN = range(-1, 5)
+n = PolicyNetwork(use_cpu=True)
+n.initialize_variables(read_file)
+instance = MCTSPlayerMixin(n)
 
 class User():
 	def __init__(self, name, state_size, action_size):
@@ -35,16 +43,15 @@ class User():
 
 
 class Agent():
-	def __init__(self, name, state_size, action_size, mcts_simulations, cpuct, model):
+	def __init__(self, name, state_size, action_size, mcts_simulations, cpuct):
 		self.name = name
-
 		self.state_size = state_size
 		self.action_size = action_size
-
 		self.cpuct = cpuct
 		self.MCTSsimulations = mcts_simulations
-		self.model = model
+		self.filepath = "saved_models/20170718"
 		self.mcts = None
+		self.pcount=0
 		self.train_overall_loss = []
 		self.train_value_loss = []
 		self.train_policy_loss = []
@@ -52,53 +59,32 @@ class Agent():
 		self.val_value_loss = []
 		self.val_policy_loss = []
 
+
 	
 	def simulate(self):
-
-		# lg.logger_mcts.info('ROOT NODE...%s', self.mcts.root.state.id)
-		# #self.mcts.root.state.render(lg.logger_mcts)
-		# lg.logger_mcts.info('CURRENT PLAYER...%d', self.mcts.root.state.playerTurn)
-
 		##### MOVE THE LEAF NODE
 		leaf, value, done, breadcrumbs = self.mcts.moveToLeaf()
-		#leaf.state.render(lg.logger_mcts)
-
 		##### EVALUATE THE LEAF NODE
 		value, breadcrumbs = self.evaluateLeaf(leaf, value, done, breadcrumbs)
-
 		##### BACKFILL THE VALUE THROUGH THE TREE
 		self.mcts.backFill(leaf, value, breadcrumbs)
 
 
-	def act(self, state, tau):
-
-		if self.mcts == None or state.id not in self.mcts.tree:
-			self.buildMCTS(state)
+	def act(self, state, bstate, turn):
+		rstate = state
+		self.pcount += 1	  
+		action = instance.suggest_move(state)
+		rstate = state.play_move(action, bstate.playerTurn, mutate=True)
+		if action is None:
+			if bstate.playerTurn == 1:
+				action = 361
+			else:
+				action = 362
 		else:
-			self.changeRootMCTS(state)
-
-		#### run the simulation
-		for sim in range(self.MCTSsimulations):
-			# lg.logger_mcts.info('***************************')
-			# lg.logger_mcts.info('****** SIMULATION %d ******', sim + 1)
-			# lg.logger_mcts.info('***************************')
-			self.simulate()
-
-		#### get action values
-		pi, values = self.getAV(1)
-
-		####pick the action
-		action, value = self.chooseAction(pi, values, tau)
-
-		nextState, _, _ = state.takeAction(action)
-		NN_value = -self.get_preds(nextState)[0]
-
-		# lg.logger_mcts.info('ACTION VALUES...%s', pi)
-		# lg.logger_mcts.info('CHOSEN ACTION...%d', action)
-		# lg.logger_mcts.info('MCTS PERCEIVED VALUE...%f', value)
-		# lg.logger_mcts.info('NN PERCEIVED VALUE...%f', NN_value)
-
-		return (action, pi, value, NN_value)
+			action = action[0]*19+action[1]
+		print(action)
+		
+		return action, rstate
 
 
 	def get_preds(self, state):

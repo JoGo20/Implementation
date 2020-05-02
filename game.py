@@ -40,7 +40,7 @@ class ActionThread (threading.Thread):
 
 
 class Game:
-    def __init__(self):
+    def __init__(self, board):
         # BLACK GOES FIRST
         self.currentPlayer = 1
         # 19*19 PLACES EQUALS 361 BOARD STATE SPACE.
@@ -48,7 +48,7 @@ class Game:
         # 363 STATE SPACE. 0 TO 362
         self.board_history = []
         self.game_score = [0,0,0]
-        self.gameState=GameState(np.array(np.zeros(363),dtype=np.int),1,self.board_history,  self.game_score)
+        self.gameState=GameState(board,1,self.board_history,  self.game_score)
         self.board_history.append(self.gameState.board[0:361])
         self.actionSpace = np.array(np.zeros(363), dtype = np.int)
         # Positive Numbers reperesent the black number of liberties where 1 has no liberties and 5 has 4 liberties.
@@ -62,10 +62,10 @@ class Game:
         self.state_size = len(self.gameState.binary)
         self.action_size = len(self.actionSpace)
 
-    def reset(self):
+    def reset(self, board):
         del self.board_history[:]
         self.game_score = [0,0,0]
-        self.gameState = GameState(np.array(np.zeros(363), dtype = np.int), 1,self.board_history,  self.game_score)
+        self.gameState = GameState(board, 1,self.board_history,  self.game_score)
         self.currentPlayer = 1
         return self.gameState
     
@@ -608,7 +608,7 @@ class GameState():
         return id
     
     def _checkForEndGame(self):
-        if(self.board[361]==1 and self.board[362]==-1) or (self.perv_score[0] > 30):
+        if(self.board[361]==1 and self.board[362]==-1):
             return 1
         return 0
     
@@ -712,7 +712,7 @@ class GameState():
         done = 0
         
         if newState.isEndGame and newState.playerTurn == -1:
-            value = newState.value[0]+self.game_score[0]+self.playerTurn*config.KOMI
+            value = 0
             done = 1
 
             
