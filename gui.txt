@@ -1,0 +1,6 @@
+// black pass
+// white pass
+// turn 
+// score
+// game board
+

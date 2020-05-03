@@ -40,16 +40,16 @@ class ActionThread (threading.Thread):
 
 
 class Game:
-    def __init__(self, board):
+    def __init__(self, board, turn):
         # BLACK GOES FIRST
-        self.currentPlayer = 1
+        self.currentPlayer = turn
         # 19*19 PLACES EQUALS 361 BOARD STATE SPACE.
         # 2 STATE SPACES FOR BOTH PLAYER TO PASS THEIR TURN.
         # 363 STATE SPACE. 0 TO 362
         self.board_history = []
         self.game_score = [0,0,0]
-        self.gameState=GameState(board,1,self.board_history,  self.game_score)
-        self.board_history.append(self.gameState.board[0:361])
+        self.gameState=GameState(np.array(board),self.currentPlayer,self.board_history,  self.game_score)
+        self.board_history.append(board)
         self.actionSpace = np.array(np.zeros(363), dtype = np.int)
         # Positive Numbers reperesent the black number of liberties where 1 has no liberties and 5 has 4 liberties.
         # Negative numbers reperesent the white number of liberties where -1 has no liberties and -5 has 4 liberties.
@@ -720,7 +720,7 @@ class GameState():
     
     
     
-    def render(self, logger):
+    def render(self):
         print()
         print(self.pieces[str(self.playerTurn)] + "'s turn:")
         for r in range(19):
@@ -731,6 +731,40 @@ class GameState():
         print("Black Pass: ", self.board[361])
         print("White Pass: ", self.board[362])
         print("Attention places", self.allowedActions)
+
+
+    
+    def renderThink(self):
+
+        f= open("gui5.txt","w+")
+        for i in range(364):
+            if i==0:
+                f.write("%d\r\n" %self.board[361])
+            elif i==1:
+                f.write("%d\r\n" %self.board[362]) 
+            elif i==2:
+                f.write("Thinking \r\n" )
+            else:
+                if self.board[i-3]==-1:
+                    f.write("w %d\r\n" % (i-3))
+                if self.board[i-4]==1:
+                    f.write("b %d\r\n" % (i-3))
+
+    def renderWait(self):
+        
+        f= open("gui5.txt","w+")
+        for i in range(364):
+            if i==0:
+                f.write("%d\r\n" %self.board[361])
+            elif i==1:
+                f.write("%d\r\n" %self.board[362])
+            elif i==2:
+                f.write("Waiting \r\n" )
+            else:
+                if self.board[i-3]==-1:
+                    f.write("w %d\r\n" % (i-3))
+                if self.board[i-4]==1:
+                    f.write("b %d\r\n" % (i-3))
         
                 
 

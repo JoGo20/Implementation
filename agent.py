@@ -72,7 +72,7 @@ class Agent():
 
 	def act(self, state, bstate, turn):
 		rstate = state
-		self.pcount += 1	  
+		instance.seconds_per_move = 1
 		action = instance.suggest_move(state)
 		rstate = state.play_move(action, bstate.playerTurn, mutate=True)
 		if action is None:

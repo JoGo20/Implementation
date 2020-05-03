@@ -85,13 +85,13 @@ def playMatches(EPISODES, logger, turns_until_tau0, goes_first = 0):
             players = {1:{"agent": player2, "name":player2.name}
                     , -1: {"agent": player1, "name":player1.name}
                     }
-        env.gameState.render(logger)
+        env.gameState.render()
         perv_turn = time.time()
         while done == 0:
             turn = turn + 1  
             #### Run the MCTS algo and return an action
 
-            action, pos = players[state.playerTurn]['agent'].act(pos, state, turn)
+            action, pos = players[state.playerTurn]['agent'].act(pos, state)
 
             print(pos.score())
 
@@ -107,7 +107,7 @@ def playMatches(EPISODES, logger, turns_until_tau0, goes_first = 0):
             ### Do the action
             state, value, done, _ = env.step(action) #the value of the newState from the POV of the new playerTurn i.e. -1 if the previous player played a winning move
             value = pos.score()
-            env.gameState.render(logger) #Send state to GUI lib
+            env.gameState.render() #Send state to GUI lib
 
             state.arr = ((19 * 19) * ctypes.c_int)()
             data = np.copy(state.board[0:361])

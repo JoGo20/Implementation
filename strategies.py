@@ -54,7 +54,7 @@ def simulate_game_random(position):
     """Simulates a game to termination, using completely random moves"""
     stime = time.time()
     while not (position.recent[-2].move is None and position.recent[-1].move is None):
-        if (time.time() - stime) > 50:
+        if (time.time() - stime) > 5:
             break
         position.play_move(select_random(position), mutate=True)
 
@@ -174,7 +174,7 @@ class MCTSNode():
 
 
 class MCTSPlayerMixin:
-    def __init__(self, policy_network, seconds_per_move=3):
+    def __init__(self, policy_network, seconds_per_move=1):
         self.policy_network = policy_network
         self.seconds_per_move = seconds_per_move
         self.max_rollout_depth = go.N * go.N * 3
