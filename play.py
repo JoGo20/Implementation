@@ -4,13 +4,13 @@ np.set_printoptions(suppress=True)
 from shutil import copyfile
 import random
 import time
-import loggers as lg
+
 from importlib import reload
-from keras.utils import plot_model
+
 from game import Game, GameState
 from agent import Agent
 from funcs import playMatches
-import loggers as lg
+
 from settings import run_folder, run_archive_folder
 import initialise
 import pickle
@@ -66,7 +66,7 @@ async def main():
     global GameInfo
     env = None
     gamepos = None
-    mode=-1
+    mode=0
     playerColor=""
     oppcolor=""
     playerName="JoGo"
@@ -75,18 +75,7 @@ async def main():
     sc=[0,0,0]
     
     ai = None
-    while mode==-1:
-        f=open("gui3.txt", "r")
-        f1=f.readlines()
-        j=0
-        for i in f1:
-            if j==0:
-                #if mode =0 --> AI Vs AI else mode=1--> AI VS User
-                mode=int(i)
-            if j==1:
-                #PlayerNum=0 --> black(player1) 1--> white(player2)
-                playerColor=str(i)
-            j=j+1
+
         
     
     if mode==0:

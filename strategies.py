@@ -6,6 +6,7 @@ import time
 import numpy as np
 import go
 import utils
+import config
 
 # Draw moves from policy net until this threshold, then play moves randomly.
 # This speeds up the simulation, and it also provides a logical cutoff
@@ -174,7 +175,7 @@ class MCTSNode():
 
 
 class MCTSPlayerMixin:
-    def __init__(self, policy_network, seconds_per_move=1):
+    def __init__(self, policy_network, seconds_per_move=config.SECS_PER_TURN):
         self.policy_network = policy_network
         self.seconds_per_move = seconds_per_move
         self.max_rollout_depth = go.N * go.N * 3

@@ -1,7 +1,6 @@
 import numpy as np
 import random
 import time
-import loggers as lg
 from game import Game, GameState
 from agent import Agent, User
 import pickle
@@ -25,7 +24,7 @@ _estimator_so = ctypes.cdll.LoadLibrary('./score_estimator.so')
 
 
 
-def playMatches(EPISODES, logger, turns_until_tau0, goes_first = 0):
+def playMatches(EPISODES , goes_first = 0):
 
     
     BOARD = np.array([[0, 0, 0, 1, 0, 0, 0, -1, 1, 0, -1, 0, 0, 1, 0, -1, 0, 0, 0],
@@ -54,7 +53,7 @@ def playMatches(EPISODES, logger, turns_until_tau0, goes_first = 0):
     board.append(0)
     board.append(0)
     board = np.array(board)
-    env = Game(board)
+    env = Game(board, 1)
     player1 = Agent('best_player', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT)
     player2 = Agent('best_player', env.state_size, env.action_size, config.MCTS_SIMS, config.CPUCT)
     scores = {player1.name:0, "drawn": 0, player2.name:0}
@@ -69,8 +68,6 @@ def playMatches(EPISODES, logger, turns_until_tau0, goes_first = 0):
         
         done = 0
         turn = 0
-        player1.mcts = None
-        player2.mcts = None
 
         if goes_first == 0:
             player1Starts = random.randint(0,1) * 2 - 1
@@ -91,7 +88,7 @@ def playMatches(EPISODES, logger, turns_until_tau0, goes_first = 0):
             turn = turn + 1  
             #### Run the MCTS algo and return an action
 
-            action, pos = players[state.playerTurn]['agent'].act(pos, state)
+            action, pos = players[state.playerTurn]['agent'].act(pos, state, turn)
 
             print(pos.score())
 
