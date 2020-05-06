@@ -375,7 +375,6 @@ if __name__== "__main__":
     blackbg=pygame.image.load(BLACKBG).convert()
     whitebg=pygame.image.load(WHITEBG).convert()
     home=pygame.image.load(HOME).convert()
-    #guiboard.startmenu(startbg)
     guiboard.startmenu(startbg,aibg,brain)
     asyncio.get_event_loop().run_until_complete(main())
 
