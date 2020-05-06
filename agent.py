@@ -62,18 +62,17 @@ class Agent():
 	def act(self, state, bstate, turn):
 		rstate = state
 		self.mcts.seconds_per_move = config.SECS_PER_TURN
-		action = self.mcts.suggest_move(state)
-		rstate = state.play_move(action, bstate.playerTurn, mutate=True)
-		if action is None:
+		baction = self.mcts.suggest_move(state)
+		if baction is None:
 			if bstate.playerTurn == 1:
 				action = 361
 			else:
 				action = 362
 		else:
-			action = action[0]*19+action[1]
-		print(action)
+			action = baction[0]*19+baction[1]
+		print(baction)
 		
-		return action, rstate
+		return baction, action, rstate
 
 
 	def replay(self, ltmemory):

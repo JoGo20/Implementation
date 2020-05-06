@@ -10,6 +10,7 @@ import ctypes
 import logging
 import threading
 import config
+from gui import *
 
 
 _estimator_so = ctypes.cdll.LoadLibrary('./score_estimator.so')
@@ -557,20 +558,8 @@ class GameState():
             
 
             
-    def _allowedActions(self):
-        for action in self.initialPlaces:
-            for n in self._getNeighbours(action):
-                if n not in self.allowedActions:
-                    if self._checkAllowance(n):
-                        self.allowedActions.append(n)           
-                    
-        attentionPlaces = []
-        
+    def _allowedActions(self):        
         for action in range(len(self.board)-2):
-            if self.board[action]!=0:
-                attentionPlaces.append(action)
-        
-        for action in attentionPlaces:
             for n in self._getNeighbours(action):
                 if n not in self.allowedActions:
                     if self._checkAllowance(n):
@@ -734,37 +723,93 @@ class GameState():
 
 
     
-    def renderThink(self):
-
-        f= open("gui5.txt","w+")
-        for i in range(364):
-            if i==0:
-                f.write("%d\r\n" %self.board[361])
-            elif i==1:
-                f.write("%d\r\n" %self.board[362]) 
-            elif i==2:
-                f.write("Thinking \r\n" )
+    
+    def renderThink(self,guiboard):
+        guiboard.updateScoreMsg((self.perv_score[2],self.perv_score[1]))
+        if self.board[361]==1:
+            guiboard.updateMsg("Thinking...","Black Pass",(0,0,0))
+        elif self.board[362]==-1:
+            guiboard.updateMsg("Thinking...","White Pass",(220,220,220))
+        else:
+            guiboard.clearboard()
+            b=np.array(self.board)
+            guiboard.drawboard(b)
+            if self.playerTurn==1:
+                color="Black"
+                guiboard.updateMsg("Thinking...",color + "'s turn",(0,0,0))
             else:
-                if self.board[i-3]==-1:
-                    f.write("w %d\r\n" % (i-3))
-                if self.board[i-4]==1:
-                    f.write("b %d\r\n" % (i-3))
+                color="White"
+                guiboard.updateMsg("Thinking...",color + "'s turn",(220,220,220))
+            
 
-    def renderWait(self):
-        
-        f= open("gui5.txt","w+")
-        for i in range(364):
-            if i==0:
-                f.write("%d\r\n" %self.board[361])
-            elif i==1:
-                f.write("%d\r\n" %self.board[362])
-            elif i==2:
-                f.write("Waiting \r\n" )
+
+    def renderWait(self,guiboard):
+        guiboard.updateScoreMsg((self.perv_score[2],self.perv_score[1]))
+        if self.board[361]==1:
+            guiboard.updateMsg("Waiting...","Black Pass",(0,0,0))
+        elif self.board[362]==-1:
+            guiboard.updateMsg("Waiting...","White Pass",(220,220,220))
+        else:
+            guiboard.clearboard()
+            b=np.array(self.board)
+            guiboard.drawboard(b)
+            if self.playerTurn==1:
+                color="Black"
+                guiboard.updateMsg("Waiting...",color + "'s turn",(0,0,0))
+                
             else:
-                if self.board[i-3]==-1:
-                    f.write("w %d\r\n" % (i-3))
-                if self.board[i-4]==1:
-                    f.write("b %d\r\n" % (i-3))
+                color="White"
+                guiboard.updateMsg("Waiting...",color + "'s turn",(220,220,220))
+
+
+    def renderThinkUser(self,guiboard, gamepos, bpass, wpass):
+        print(bpass, wpass)
+        (x,y) = gamepos.fullscore()
+        y =y+bpass
+        x=x+wpass
+        guiboard.updateFullScoreMsg((y,x),(self.perv_score[2],self.perv_score[1]))
+        if self.board[361]==1:
+            guiboard.updateMsg("Thinking...","Black Pass",(0,0,0))
+        elif self.board[362]==-1:
+            guiboard.updateMsg("Thinking...","White Pass",(220,220,220))
+        else:
+            guiboard.clearboard()
+            b=np.array(self.board)
+            guiboard.drawboard(b)
+            if self.playerTurn==1:
+                color="Black"
+                guiboard.updateMsg("Thinking...",color + "'s turn",(0,0,0))
+            else:
+                color="White"
+                guiboard.updateMsg("Thinking...",color + "'s turn",(220,220,220))
+            
+
+
+    def renderWaitUser(self,guiboard, gamepos, bpass, wpass):
+        (x,y) = gamepos.fullscore()
+        y =y+bpass
+        x=x+wpass
+        guiboard.updateFullScoreMsg((y,x),(self.perv_score[2],self.perv_score[1]))
+        if self.board[361]==1:
+            guiboard.updateMsg("Waiting...","Black Pass",(0,0,0))
+        elif self.board[362]==-1:
+            guiboard.updateMsg("Waiting...","White Pass",(220,220,220))
+        else:
+            guiboard.clearboard()
+            b=np.array(self.board)
+            guiboard.drawboard(b)
+            if self.playerTurn==1:
+                color="Black"
+                guiboard.updateMsg("Waiting...",color + "'s turn",(0,0,0))
+                
+            else:
+                color="White"
+                guiboard.updateMsg("Waiting...",color + "'s turn",(220,220,220))
+            
+
+                
+
+
         
                 
 

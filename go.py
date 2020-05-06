@@ -398,6 +398,26 @@ class Position():
 
         return np.count_nonzero(working_board == BLACK) - np.count_nonzero(working_board == WHITE) - self.komi
 
+    def fullscore(self):
+        'Return score from B perspective. If W is winning, score is negative.'
+        working_board = np.copy(self.board)
+        while EMPTY in working_board:
+            unassigned_spaces = np.where(working_board == EMPTY)
+            c = unassigned_spaces[0][0], unassigned_spaces[1][0]
+            territory, borders = find_reached(working_board, c)
+            border_colors = set(working_board[b] for b in borders)
+            X_border = BLACK in border_colors
+            O_border = WHITE in border_colors
+            if X_border and not O_border:
+                territory_color = BLACK
+            elif O_border and not X_border:
+                territory_color = WHITE
+            else:
+                territory_color = UNKNOWN # dame, or seki
+            place_stones(working_board, territory_color, territory)
+
+        return [np.count_nonzero(working_board == BLACK) , np.count_nonzero(working_board == WHITE) + self.komi]
+
     def result(self):
         score = self.score()
         if score > 0:
