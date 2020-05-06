@@ -29,6 +29,8 @@ class GameServer:
         self.Winner = None
         self.board = None  
         self.endgame=None
+        self.pause = False
+        self.winner = None
     def GetGameConfig(self):
         return self.GameConfig
     def getOppMove(self, i):
@@ -68,6 +70,8 @@ async def ReadyState(GameInfo):
             GameInfo.State = States.IDLE
         # print(GameInfo.PlayerColor)
     elif response['type'] == 'END':
+        GameInfo.pause = response['reason'] == 'pause'
+        GameInfo.winner = response['winner']
         print("End")
         GameInfo.UpdateScoreAndTime(response)
         GameInfo.endgame=True
@@ -90,6 +94,8 @@ async def IdleState(GameInfo):
         GameInfo.RemainTime = Msg['remainingTime']  
         
     elif Msg['type'] == 'END' :
+        GameInfo.pause = Msg['reason'] == 'pause'
+        GameInfo.winner = Msg['winner']
         GameInfo.State = States.READY
         GameInfo.endgame=True
         GameInfo.UpdateScoreAndTime(Msg)
@@ -165,6 +171,8 @@ async def ThinkState(GameInfo, x,y, typ):
         print(Msg)
         
         if Msg['type'] == 'END':
+            GameInfo.pause = Msg['reason'] == 'pause'
+            GameInfo.winner = Msg['winner']
             GameInfo.State = States.READY
             GameInfo.endgame=True
             GameInfo.UpdateScoreAndTime(Msg)

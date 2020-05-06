@@ -11,7 +11,7 @@ WHITE = (220, 220, 220)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0) 
 BLUE = (0, 0, 128)
-RED=(255,0,0)
+RED=(128,128,128)
 #BGC=(220,220,220)
 BGC=(255,255,255)
 whiteScorePos=[1105,100]
@@ -143,8 +143,9 @@ class Board():
          self.screen.blit(brain, (1048, 50))
          pygame.display.update()
 
-    def getUserAction(self,passbg,usercolor):
+    def getUserAction(self,passbg,usercolor, home):
         self.screen.blit(passbg, (910, 300))
+        self.screen.blit(home, (960, 700))
         pygame.display.update()
         while(True):
             #guiboard.updateMsg("","Its Your Turn",RED)
@@ -174,6 +175,9 @@ class Board():
                                     action=362
                                     pygame.draw.rect(self.screen, BGC,(820,0,1200,500))
                                     return action
+                            elif x>960 and x<1060 and y>700 and y<800:
+                                return -1
+
 
 
 

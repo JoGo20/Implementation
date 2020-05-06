@@ -767,7 +767,7 @@ class GameState():
         (x,y) = gamepos.fullscore()
         y =y+bpass
         x=x+wpass
-        guiboard.updateFullScoreMsg((y,x),(self.perv_score[2],self.perv_score[1]))
+        guiboard.updateFullScoreMsg((y+self.perv_score[2],x+self.perv_score[1]),(self.perv_score[2],self.perv_score[1]))
         if self.board[361]==1:
             guiboard.updateMsg("Thinking...","Black Pass",(0,0,0))
         elif self.board[362]==-1:
@@ -789,7 +789,7 @@ class GameState():
         (x,y) = gamepos.fullscore()
         y =y+bpass
         x=x+wpass
-        guiboard.updateFullScoreMsg((y,x),(self.perv_score[2],self.perv_score[1]))
+        guiboard.updateFullScoreMsg((y+self.perv_score[2],x+self.perv_score[1]),(self.perv_score[2],self.perv_score[1]))
         if self.board[361]==1:
             guiboard.updateMsg("Waiting...","Black Pass",(0,0,0))
         elif self.board[362]==-1:

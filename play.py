@@ -34,6 +34,7 @@ PASS='images/pass.jpg'
 BLACKBG='images/black.png'
 WHITEBG='images/white.jpg'
 JOGO = 'images/rpp.jpg'
+HOME ='images/home.jpg'
 BOARD_SIZE = (820, 820)
 SCREEN_SIZE = (1200,820)
 WHITE = (220, 220, 220)
@@ -75,7 +76,13 @@ def initialdboard(iboard):
 
 def theend(gboard):
     score=(str(GameInfo.score["W"]),str(GameInfo.score["B"]))
-    guiboard.updateMsg("","GAME ENDED",RED)
+    if GameInfo.pause:
+        guiboard.updateMsg("","GAME PAUSE",RED)
+    else:
+        if str(GameInfo.winner) == 'W':
+            guiboard.updateMsg("WHITE WON","GAME ENDED",RED)
+        if str(GameInfo.winner) == 'B':
+            guiboard.updateMsg("BLACK WON","GAME ENDED",RED)
     gboard.updateScoreMsg(score)
     
 
@@ -278,14 +285,17 @@ async def main():
             while(True):
                 turn =turn+1
                 if (turn == 1 and usercolor == "BLACK") or turn != 1:
-                    useraction = -1
+                    useraction = -2
                     if turn == 1:
                         env.gameState.renderWaitUser(guiboard, gamepos, bpass, wpass)
-                    while useraction not in env.gameState.allowedActions:
-                        useraction=guiboard.getUserAction(passbg,usercolor)
-                        if useraction not in env.gameState.allowedActions:
+                    while useraction not in env.gameState.allowedActions and useraction != -1:
+                        useraction=guiboard.getUserAction(passbg,usercolor, home)
+                        if useraction not in env.gameState.allowedActions and useraction != -1:
                             env.gameState.renderWaitUser(guiboard, gamepos, bpass, wpass)
                             guiboard.updateMsg("TRY AGAIN","INVALID ACTION",BLACK)
+                    if useraction == -1:
+                        mode = -1
+                        break
                     env.step(useraction)
                     if useraction == 361 or useraction ==362:
                         baction = None
@@ -364,6 +374,7 @@ if __name__== "__main__":
     passbg=pygame.image.load(PASS).convert()
     blackbg=pygame.image.load(BLACKBG).convert()
     whitebg=pygame.image.load(WHITEBG).convert()
+    home=pygame.image.load(HOME).convert()
     #guiboard.startmenu(startbg)
     guiboard.startmenu(startbg,aibg,brain)
     asyncio.get_event_loop().run_until_complete(main())
