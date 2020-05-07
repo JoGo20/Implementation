@@ -48,12 +48,12 @@ more than one color is not considered a territory. <br />
 # Install
 
 clone this repository
-> $ cd [GAME-FOLDER-DIRECTORY]
-> $ git clone https://github.com/JoGo20/Implementation.git
-> $ cd Implementation
-> $ chmod +x install.sh
-> $ bash install.sh
-> $ chmod +x run,sh
+> $ cd [GAME-FOLDER-DIRECTORY]<br />
+> $ git clone https://github.com/JoGo20/Implementation.git<br />
+> $ cd Implementation<br />
+> $ chmod +x install.sh<br />
+> $ bash install.sh<br />
+> $ chmod +x run,sh<br />
 
 
 # Play
