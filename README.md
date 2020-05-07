@@ -43,3 +43,23 @@ scoring and territory calculation.  <br />
 13- A territory of a certain player is an area of empty points that is completely
 surrounded by the stones of that player only. Any empty area that touches stones of
 more than one color is not considered a territory. <br />
+
+
+# Install
+
+clone this repository
+> $ cd [GAME-FOLDER-DIRECTORY]
+> $ git clone https://github.com/JoGo20/Implementation.git
+> $ cd Implementation
+> $ chmod +x install.sh
+> $ bash install.sh
+> $ chmod +x run,sh
+
+
+# Play
+> $ bash run.sh
+
+# Choose game mode 
+from upper left icons
+AI vs AI Mode: Left Icon. In this mode you need to have a server running from https://github.com/yahiaetman/Go-Server thanks to Eng. Yehia Etman.
+AI vs User Mode: Right Icon.

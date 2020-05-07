@@ -11,7 +11,7 @@ import threading
 import config
 from typing import List
 import ctypes
-import go
+import gfuncs as go
 
 _estimator_so = ctypes.cdll.LoadLibrary('./score_estimator.so')
 

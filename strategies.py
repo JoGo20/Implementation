@@ -4,7 +4,7 @@ import random
 import sys
 import time
 import numpy as np
-import go
+import gfuncs as go
 import utils
 import config
 

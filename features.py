@@ -19,7 +19,7 @@ only if the feature was equal to i. Any features >= 8 would be marked as 8.
 '''
 
 import numpy as np
-import go
+import gfuncs as go
 from utils import product
 
 # Resolution/truncation limit for one-hot features

@@ -41,7 +41,7 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
 import features
-import go
+import gfuncs as go
 import utils
 
 EPSILON = 1e-35

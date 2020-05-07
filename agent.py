@@ -16,7 +16,7 @@ import os
 import random
 import re
 import sys
-import go
+import gfuncs as go
 from policy import PolicyNetwork
 from strategies import MCTSPlayerMixin
 read_file = config.TRAINED_MODEL_PATH

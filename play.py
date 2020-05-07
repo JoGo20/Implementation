@@ -17,7 +17,7 @@ import logging
 import threading
 from typing import List
 import ctypes
-import go
+import gfuncs as go
 import asyncio
 import math
 import pygame

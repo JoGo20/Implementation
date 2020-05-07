@@ -5,7 +5,7 @@ import operator
 import random
 import re
 import time
-import go
+import gfuncs as go
 import logging
 
 def setup_logger(name, log_file, level=logging.INFO):
