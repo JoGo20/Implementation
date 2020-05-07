@@ -50,6 +50,7 @@ more than one color is not considered a territory. <br />
 Clone this repository
 > $ cd [GAME-FOLDER-DIRECTORY]<br />
 > $ git clone https://github.com/JoGo20/Implementation.git<br />
+Download and unzip in the directory https://drive.google.com/file/d/1FR5YSVQwb6EIyTR8H33Y3ygaVQyDTyTo/view?usp=sharing<br />
 > $ cd Implementation<br />
 > $ chmod +x install.sh<br />
 > $ bash install.sh<br />
