@@ -180,7 +180,6 @@ async def main():
                                 
                                 if env is None:
                                     env = Game(board, 1)
-                                    env.gameState.render()
                                     gamepos = go.Position(board=initialdboard(board))
                                 else:
                                     print("Environment Turn ",env.gameState.playerTurn)
@@ -282,8 +281,6 @@ async def main():
             pygame.draw.rect(guiboard.screen, BGC,(820,0,1200,820))
             board = initialboarduser()
             env = Game(board,1)
-            env.gameState.render()
-            print("Here")
             
  
             gamepos = go.Position(board=initialdboard(board))
@@ -332,8 +329,6 @@ async def main():
                 else:                       
                     env.gameState.renderThinkUser(guiboard, gamepos, bpass, wpass)
 
-
-                env.gameState.render()
                 guiboard.screen.blit(jogo, (910, 300))
                 pygame.display.update()
                 aiaction = -1
@@ -357,8 +352,6 @@ async def main():
                         wpass += 1
                 env.gameState.renderWaitUser(guiboard, gamepos, bpass, wpass)
 
-
-                #guiboard.updateMsg(str(useraction),usercolor,RED)
 
 
             
