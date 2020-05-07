@@ -58,9 +58,11 @@ async def ReadyState(GameInfo):
         GameInfo.GameConfig = response['configuration']
         GameInfo.PlayerColor = response['color']
         GameInfo.board = GameInfo.GameConfig['initialState']['board']
-        print(GameInfo.GameConfig['initialState']['turn'])
-        print(GameInfo.PlayerColor)
-        print(GameInfo.GameConfig['moveLog'])
+        GameInfo.board[1][1]="B"
+        GameInfo.board[2][2]="W"
+        print(GameInfo.GameConfig)
+        print("Server player color-->"+str(GameInfo.PlayerColor))
+        print("Server player turn-->"+str(GameInfo.GameConfig['initialState']['turn']))
         MoveLog = GameInfo.GameConfig['moveLog']
         # print(GameInfo.PlayerColor == GameInfo.GameConfig['initialState']['turn'])
         print( ( (GameInfo.PlayerColor == GameInfo.GameConfig['initialState']['turn'] and len(MoveLog) % 2 == 0) or (GameInfo.PlayerColor != GameInfo.GameConfig['initialState']['turn'] and len(MoveLog) % 2 != 0)))

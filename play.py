@@ -50,7 +50,6 @@ BGC=(255,255,255)
 GameInfo = GameServer()
 def initialboard():
     board=[]
-    GameInfo.board = np.zeros([19,19])
     for i in range(19):
         for j in range(19):
             if GameInfo.board[i][j]=="B":
@@ -62,6 +61,14 @@ def initialboard():
     board.append(0)
     board.append(0)
     return board
+
+def initialboarduser():
+    board=[]
+    for i in range(363):
+        board.append(0)
+    return board
+    
+
     
 def initialdboard(iboard):
     board=[]
@@ -102,8 +109,6 @@ async def main():
         playerTurn=0
         action=0
         sc=[0,0,0]
-        
-        
         chosen=-1
         guiboard.startmenu(startbg,aibg,brain)  
          
@@ -161,13 +166,14 @@ async def main():
                     elif GameInfo.State == States.READY:
                         await ReadyState(GameInfo)
                         playerColor=str(GameInfo.PlayerColor)
-                        print(playerColor)
+                        print("Player Color is"+playerColor)
                         guiboard.updateMsg("","Game is ready!",BLACK)
                         if GameInfo.endgame==False:
                                 board = initialboard()
                                 if playerColor=="b" or playerColor=="B" or playerColor=="black" or playerColor=="BLACK":
                                     oppcolor="W"
                                     playerTurn=1
+                                    
                                 else:
                                     oppcolor="B"
                                     playerTurn=-1
@@ -176,6 +182,8 @@ async def main():
                                     env = Game(board, 1)
                                     env.gameState.render()
                                     gamepos = go.Position(board=initialdboard(board))
+                                else:
+                                    print("Environment Turn ",env.gameState.playerTurn)
                         else:
                             theend(guiboard)
                     
@@ -184,29 +192,31 @@ async def main():
                         
                     elif  GameInfo.State == States.IDLE:
                         await IdleState(GameInfo)
-                        action = None
-                        baction = None
-                        if GameInfo.getOppMove(0)==-1:
-                            if playerColor=="B":
-                                action=362
+                        if GameInfo.State!= States.READY:
+
+                            action = None
+                            baction = None
+                            if GameInfo.getOppMove(0)==-1:
+                                if playerColor=="B":
+                                    action=362
+                                else:
+                                    action=361
+                            elif GameInfo.getOppMove(0)==-2:
+                                pass
                             else:
-                                action=361
-                        elif GameInfo.getOppMove(0)==-2:
-                            pass
-                        else:
-                            baction = (int(GameInfo.getOppMove(0)),int(GameInfo.getOppMove(1)))
-                            action=int(GameInfo.getOppMove(0))*19+int(GameInfo.getOppMove(1))
-                        gamepos = gamepos.play_move(baction, env.gameState.playerTurn, mutate=True)
-                        env.step(action)
-                        turn = turn + 1
-                        if action == 361 or action == 362:
-                            if -1*env.gameState.playerTurn == 1:
-                                bpass += 1
-                            else:
-                                wpass += 1  
-                        env.gameState.renderThinkUser(guiboard, gamepos, bpass, wpass)
-                        guiboard.screen.blit(jogo, (910, 300))
-                        pygame.display.update()
+                                baction = (int(GameInfo.getOppMove(0)),int(GameInfo.getOppMove(1)))
+                                action=int(GameInfo.getOppMove(0))*19+int(GameInfo.getOppMove(1))
+                            gamepos = gamepos.play_move(baction, env.gameState.playerTurn, mutate=True)
+                            env.step(action)
+                            turn = turn + 1
+                            if action == 361 or action == 362:
+                                if -1*env.gameState.playerTurn == 1:
+                                    bpass += 1
+                                else:
+                                    wpass += 1  
+                            env.gameState.renderThinkUser(guiboard, gamepos, bpass, wpass)
+                            guiboard.screen.blit(jogo, (910, 300))
+                            pygame.display.update()
 
 
                     elif  GameInfo.State == States.THINK:
@@ -228,7 +238,7 @@ async def main():
                         
 
                         await ThinkState(GameInfo, x,y,typ)
-                        if GameInfo.validmove==True:
+                        if GameInfo.validmove==True and GameInfo.State!=States.READY:
                             gamepos = gamepos.play_move(baction, env.gameState.playerTurn, mutate=True)
                             env.step(action)
                             if action == 361 or action == 362:
@@ -236,7 +246,7 @@ async def main():
                                     bpass += 1
                                 else:
                                     wpass += 1 
-                        turn = turn + 1  
+                            turn = turn + 1  
                         this_turn = time.time()
                         env.gameState.renderWaitUser(guiboard, gamepos, bpass, wpass)
                         guiboard.screen.blit(jogo, (910, 300))
@@ -270,7 +280,7 @@ async def main():
                             if x>1048 and x<1148 and y>50 and y<150:
                                 usercolor="WHITE"
             pygame.draw.rect(guiboard.screen, BGC,(820,0,1200,820))
-            board = initialboard()
+            board = initialboarduser()
             env = Game(board,1)
             env.gameState.render()
             print("Here")
