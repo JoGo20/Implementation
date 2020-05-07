@@ -18,7 +18,7 @@ import re
 import sys
 import gfuncs as go
 from policy import PolicyNetwork
-from strategies import MCTSPlayerMixin
+from tactics import MCTSPlayerMixin
 read_file = config.TRAINED_MODEL_PATH
 WHITE, EMPTY, BLACK, FILL, KO, UNKNOWN = range(-1, 5)
 
