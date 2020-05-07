@@ -47,7 +47,7 @@ more than one color is not considered a territory. <br />
 
 # Install
 
-clone this repository
+Clone this repository
 > $ cd [GAME-FOLDER-DIRECTORY]<br />
 > $ git clone https://github.com/JoGo20/Implementation.git<br />
 > $ cd Implementation<br />
@@ -60,6 +60,6 @@ clone this repository
 > $ bash run.sh
 
 # Choose game mode 
-from upper left icons<br />
+From upper left icons<br />
 AI vs AI Mode: Left Icon. In this mode you need to have a server running from https://github.com/yahiaetman/Go-Server thanks to Eng. Yehia Etman.<br />
 AI vs User Mode: Right Icon.
