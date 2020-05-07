@@ -53,7 +53,7 @@ Clone this repository
 > $ cd Implementation<br />
 > $ chmod +x install.sh<br />
 > $ bash install.sh<br />
-> $ chmod +x run,sh<br />
+> $ chmod +x run.sh<br />
 
 
 # Play
