@@ -111,4 +111,4 @@ games/archive/
 *.pyc
 
 run/
-saved_models/
+model/

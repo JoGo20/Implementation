@@ -1,6 +1,6 @@
 #### PLAYING
 SECS_PER_TURN = 1
-TRAINED_MODEL_PATH = "saved_models/20170718"
+TRAINED_MODEL_PATH = "model/trial2"
 USE_CPU = True
 
 #### SELF PLAY
