@@ -8,7 +8,6 @@ from importlib import reload
 from game import Game, GameState
 from agent import Agent
 from funcs import playMatches
-import initialise
 import pickle
 import config
 from client import *

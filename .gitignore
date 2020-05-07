@@ -112,3 +112,6 @@ games/archive/
 
 run/
 model/
+.ipynb_checkpoints/
+.__pycache__/
+.vscode/
