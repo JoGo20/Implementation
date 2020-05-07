@@ -60,6 +60,6 @@ clone this repository
 > $ bash run.sh
 
 # Choose game mode 
-from upper left icons
-AI vs AI Mode: Left Icon. In this mode you need to have a server running from https://github.com/yahiaetman/Go-Server thanks to Eng. Yehia Etman.
+from upper left icons<br />
+AI vs AI Mode: Left Icon. In this mode you need to have a server running from https://github.com/yahiaetman/Go-Server thanks to Eng. Yehia Etman.<br />
 AI vs User Mode: Right Icon.
