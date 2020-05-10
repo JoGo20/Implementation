@@ -60,7 +60,7 @@ Download and unzip in the directory https://drive.google.com/file/d/1FR5YSVQwb6E
 # Play
 > $ bash run.sh
 
-# Choose game mode 
+# Choose Game Gode 
 From upper right icons<br />
 AI vs AI Mode: Left Icon. In this mode you need to have a server running from https://github.com/yahiaetman/Go-Server thanks to Eng. Yehia Etman.<br />
 AI vs User Mode: Right Icon.
