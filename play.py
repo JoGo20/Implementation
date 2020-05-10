@@ -190,31 +190,31 @@ async def main():
                         
                     elif  GameInfo.State == States.IDLE:
                         await IdleState(GameInfo)
-                        if GameInfo.State!= States.READY:
 
-                            action = None
-                            baction = None
-                            if GameInfo.getOppMove(0)==-1:
-                                if playerColor=="B":
-                                    action=362
-                                else:
-                                    action=361
-                            elif GameInfo.getOppMove(0)==-2:
-                                pass
+
+                        action = None
+                        baction = None
+                        if GameInfo.getOppMove(0)==-1:
+                            if playerColor=="B":
+                                action=362
                             else:
-                                baction = (int(GameInfo.getOppMove(0)),int(GameInfo.getOppMove(1)))
-                                action=int(GameInfo.getOppMove(0))*19+int(GameInfo.getOppMove(1))
-                            gamepos = gamepos.play_move(baction, env.gameState.playerTurn, mutate=True)
-                            env.step(action)
-                            turn = turn + 1
-                            if action == 361 or action == 362:
-                                if -1*env.gameState.playerTurn == 1:
-                                    bpass += 1
-                                else:
-                                    wpass += 1  
-                            env.gameState.renderThinkUser(guiboard, gamepos, bpass, wpass)
-                            guiboard.screen.blit(jogo, (910, 300))
-                            pygame.display.update()
+                                action=361
+                        elif GameInfo.getOppMove(0)==-2:
+                            pass
+                        else:
+                            baction = (int(GameInfo.getOppMove(0)),int(GameInfo.getOppMove(1)))
+                            action=int(GameInfo.getOppMove(0))*19+int(GameInfo.getOppMove(1))
+                        gamepos = gamepos.play_move(baction, env.gameState.playerTurn, mutate=True)
+                        env.step(action)
+                        turn = turn + 1
+                        if action == 361 or action == 362:
+                            if -1*env.gameState.playerTurn == 1:
+                                bpass += 1
+                            else:
+                                wpass += 1  
+                        env.gameState.renderThinkUser(guiboard, gamepos, bpass, wpass)
+                        guiboard.screen.blit(jogo, (910, 300))
+                        pygame.display.update()
 
 
                     elif  GameInfo.State == States.THINK:
@@ -236,7 +236,7 @@ async def main():
                         
 
                         await ThinkState(GameInfo, x,y,typ)
-                        if GameInfo.validmove==True and GameInfo.State!=States.READY:
+                        if GameInfo.validmove==True:
                             gamepos = gamepos.play_move(baction, env.gameState.playerTurn, mutate=True)
                             env.step(action)
                             if action == 361 or action == 362:
